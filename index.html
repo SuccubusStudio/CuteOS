@@ -1975,7 +1975,8 @@
 
         // --- 主系統 ---
         const CuteOS = () => {
-          const [bootPhase, setBootPhase] = useState('bios'); 
+          // 修改：將初始狀態設定為 'welcome'，跳過 'bios' 和 'dos'
+          const [bootPhase, setBootPhase] = useState('welcome'); 
           const [showPowerMenu, setShowPowerMenu] = useState(false);
           const [windows, setWindows] = useState([]);
           const [zIndexCounter, setZIndexCounter] = useState(10);
@@ -2007,6 +2008,10 @@
           useEffect(() => {
             if (bootPhase === 'shutdown') {
               const timer = setTimeout(() => setBootPhase('bios'), 3000);
+              return () => clearTimeout(timer);
+            }
+            if (bootPhase === 'bios') {
+              const timer = setTimeout(() => setBootPhase('dos'), 4000); // 這裡保留 BIOS 的 4 秒，讓重開機還是有完整流程
               return () => clearTimeout(timer);
             }
             if (bootPhase === 'welcome') {
