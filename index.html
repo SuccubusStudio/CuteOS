@@ -32,7 +32,7 @@
         ::-webkit-scrollbar-thumb:hover { background: #f472b6; }
         .dark ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Cute Hub 專用動畫 */
+        /* Cut Hub / CuteCut / Bunny 專用動畫 */
         @keyframes wiggle {
             0%, 100% { transform: rotate(-20deg); }
             50% { transform: rotate(20deg); }
@@ -44,6 +44,11 @@
             50% { transform: scale(1.1) translateX(10px); }
         }
         .animate-eat { animation: eat 0.3s ease-in-out infinite; }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -64,6 +69,24 @@
         const IconMoon = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>;
         const IconSun = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>;
         const IconLoader = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>;
+
+        // --- 全域通訊軟體狀態 (讓訊息在 App 關閉時也能保存) ---
+        let globalChatState = {
+          boss: {
+            id: 'boss',
+            name: '老闆 💼',
+            avatar: '👨‍💼',
+            unread: 0,
+            messages: []
+          },
+          friend: {
+            id: 'friend',
+            name: '八卦仔 🐰',
+            avatar: '🐰',
+            unread: 0,
+            messages: []
+          }
+        };
 
         // --- 開機畫面 (Boot Sequence) ---
         const BiosScreen = ({ onEnterSetup, onContinue }) => {
@@ -1055,6 +1078,813 @@
           )
         };
 
+        // 9. 瀏覽器 (Cute Browser)
+        const AppBrowser = () => {
+          const [activeTab, setActiveTab] = useState(0);
+          const [searchQuery, setSearchQuery] = useState('');
+          const [showResults, setShowResults] = useState(false);
+          
+          const handleSearch = (e) => {
+            if (e.key === 'Enter' || e.type === 'click') {
+              if (searchQuery.trim() !== '') {
+                setShowResults(true);
+              }
+            }
+          };
+
+          return (
+            <div className="w-full h-full flex flex-col bg-white dark:bg-slate-800 transition-colors font-sans">
+              {/* Tabs Bar */}
+              <div className="flex bg-gray-200 dark:bg-slate-900 pt-2 px-2 gap-1 items-end">
+                <div onClick={() => setActiveTab(0)} className={`px-4 py-2 rounded-t-lg cursor-pointer text-xs sm:text-sm flex items-center gap-2 ${activeTab === 0 ? 'bg-white dark:bg-slate-800 text-gray-800 dark:text-white font-bold shadow-[0_-2px_5px_rgba(0,0,0,0.05)]' : 'bg-gray-300 dark:bg-slate-700 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-600'}`}>
+                  🔍 Googo 搜尋
+                </div>
+                <div onClick={() => setActiveTab(1)} className={`px-4 py-2 rounded-t-lg cursor-pointer text-xs sm:text-sm flex items-center gap-2 ${activeTab === 1 ? 'bg-white dark:bg-slate-800 text-gray-800 dark:text-white font-bold shadow-[0_-2px_5px_rgba(0,0,0,0.05)]' : 'bg-gray-300 dark:bg-slate-700 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-600'}`}>
+                  🍐 Pear 官網
+                </div>
+              </div>
+              
+              {/* URL Bar */}
+              <div className="flex p-2 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 gap-2 items-center">
+                <div className="flex gap-2 text-gray-400 px-2 cursor-pointer">
+                  <span className="hover:text-gray-600 dark:hover:text-white">⬅</span>
+                  <span className="hover:text-gray-600 dark:hover:text-white">➡</span>
+                  <span className="hover:text-gray-600 dark:hover:text-white" onClick={() => { if(activeTab === 0) setShowResults(false); }}>↻</span>
+                </div>
+                <div className="flex-1 bg-gray-100 dark:bg-slate-900 rounded-full px-4 py-1.5 text-xs text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                  🔒 {activeTab === 0 ? 'https://www.googo.com.tw' : 'https://www.pear.com/tw/'}
+                </div>
+              </div>
+
+              {/* Content Area */}
+              <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white dark:bg-slate-800 relative text-gray-800 dark:text-gray-100">
+                {activeTab === 0 ? (
+                  // Googo Search
+                  <div className="min-h-full flex flex-col items-center pt-16 sm:pt-24 px-4 pb-10">
+                    {!showResults ? (
+                      <>
+                        <h1 className="text-5xl sm:text-7xl font-bold mb-8 tracking-tighter select-none">
+                          <span className="text-blue-500">G</span>
+                          <span className="text-red-500">o</span>
+                          <span className="text-yellow-500">o</span>
+                          <span className="text-blue-500">g</span>
+                          <span className="text-green-500">o</span>
+                        </h1>
+                        <input 
+                          type="text" 
+                          value={searchQuery}
+                          onChange={e => setSearchQuery(e.target.value)}
+                          onKeyDown={handleSearch}
+                          placeholder="在 Googo 上搜尋或是輸入網址"
+                          className="w-full max-w-lg border border-gray-300 dark:border-slate-600 rounded-full px-5 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 dark:bg-slate-900 dark:text-white transition-all"
+                        />
+                        <div className="mt-8 flex gap-3">
+                          <button onClick={handleSearch} className="bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 px-5 py-2 rounded-md text-sm text-gray-700 dark:text-gray-200 transition-colors border border-transparent dark:border-slate-600">Googo 搜尋</button>
+                          <button onClick={handleSearch} className="bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 px-5 py-2 rounded-md text-sm text-gray-700 dark:text-gray-200 transition-colors border border-transparent dark:border-slate-600">好手氣 (亂按)</button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full text-left">
+                         <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-200 dark:border-slate-700">
+                            <h1 className="text-3xl font-bold tracking-tighter cursor-pointer" onClick={() => setShowResults(false)}>
+                              <span className="text-blue-500">G</span><span className="text-red-500">o</span><span className="text-yellow-500">o</span><span className="text-blue-500">g</span><span className="text-green-500">o</span>
+                            </h1>
+                            <input 
+                              type="text" 
+                              value={searchQuery}
+                              onChange={e => setSearchQuery(e.target.value)}
+                              onKeyDown={handleSearch}
+                              className="flex-1 max-w-lg border border-gray-300 dark:border-slate-600 rounded-full px-5 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 dark:bg-slate-900 dark:text-white transition-all"
+                            />
+                         </div>
+                         <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">為您找到約 8,934,120 項結果 (因為您太可愛了)</p>
+                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
+                           {Array.from({length: 12}).map((_, i) => (
+                             <div key={i} className="bg-gray-50 dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm aspect-square flex flex-col items-center justify-center p-2 border border-gray-100 dark:border-slate-700">
+                                {/* 使用外部 API 產生可愛機器人或貓咪圖片 */}
+                                <img src={`https://api.dicebear.com/7.x/bottts/svg?seed=${searchQuery}${i}`} alt="result" className="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
+                             </div>
+                           ))}
+                         </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  // Pear Store
+                  <div className="min-h-full flex flex-col bg-black text-white text-center font-sans select-none">
+                    <div className="w-full py-3 text-[10px] sm:text-xs text-gray-300 bg-[#161616] flex justify-center gap-4 sm:gap-8 font-semibold">
+                       <span className="hover:text-white cursor-pointer">🍐 Store</span>
+                       <span className="hover:text-white cursor-pointer">MacBook</span>
+                       <span className="hover:text-white cursor-pointer">iPad</span>
+                       <span className="hover:text-white cursor-pointer">iPhone</span>
+                       <span className="hover:text-white cursor-pointer">Watch</span>
+                       <span className="hover:text-white cursor-pointer hidden sm:inline">Support</span>
+                    </div>
+                    <div className="w-full bg-[#1d1d1f] py-2 text-xs text-gray-400">
+                       線上購買 Pear 16 Pro Max 可享免運費，或者直接來店裡讓我們坑你一筆。 <span className="text-blue-400 hover:underline cursor-pointer">了解更多 &gt;</span>
+                    </div>
+                    
+                    <div className="flex-1 flex flex-col items-center justify-start pt-16 sm:pt-24 p-8 relative overflow-hidden">
+                       <h2 className="text-5xl sm:text-7xl font-bold mb-4 tracking-tight z-10 text-white">Pear 16 Pro</h2>
+                       <p className="text-xl sm:text-2xl text-gray-400 mb-8 z-10 font-medium tracking-wide">極致極簡。極致盤子。</p>
+                       <div className="flex gap-4 z-10">
+                         <button className="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition-colors text-sm sm:text-base">買買買</button>
+                         <button className="border border-blue-500 text-blue-500 px-6 py-2 rounded-full font-bold hover:bg-blue-500 hover:text-white transition-colors text-sm sm:text-base">還是買買買</button>
+                       </div>
+                       
+                       {/* 假裝很高級的手機本體 */}
+                       <div className="mt-16 w-64 h-80 sm:w-80 sm:h-96 border-8 border-gray-800 rounded-[3rem] relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-gray-700 to-black shadow-2xl z-10 group cursor-pointer">
+                           <div className="absolute top-2 w-1/3 h-6 bg-black rounded-full"></div> {/* 假裝動態島 */}
+                           <span className="text-9xl grayscale opacity-30 group-hover:scale-110 transition-transform duration-700 group-hover:opacity-60 drop-shadow-2xl">🍐</span>
+                           {/* 假裝有高級反光 */}
+                           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 transform -translate-x-full group-hover:translate-x-full"></div>
+                       </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        };
+
+        // 10. CuteCut (專業剪輯軟體)
+        const AppCuteCut = () => {
+          const [playing, setPlaying] = useState(false);
+          const [currentTime, setCurrentTime] = useState(0); // 0 to 100 (%)
+          const timelineRef = useRef(null);
+          
+          // 初始化兩段短片在時間軸上的位置 (start % 和 width %)
+          const [clips, setClips] = useState([
+            { id: 1, content: '🐰', track: 1, start: 10, width: 30, color: 'bg-pink-400' },
+            { id: 2, content: '🐱', track: 2, start: 45, width: 30, color: 'bg-blue-400' }
+          ]);
+
+          const [draggingClip, setDraggingClip] = useState(null);
+
+          // 播放邏輯
+          useEffect(() => {
+            let req;
+            if (playing) {
+              const tick = () => {
+                setCurrentTime(prev => {
+                  if (prev >= 100) {
+                    setPlaying(false);
+                    return 0; // 播完自動歸零暫停
+                  }
+                  return prev + 0.3; // 播放速度
+                });
+                req = requestAnimationFrame(tick);
+              };
+              req = requestAnimationFrame(tick);
+            }
+            return () => cancelAnimationFrame(req);
+          }, [playing]);
+
+          // 尋找當前時間點正在播放的片段 (Track 1 優先於 Track 2)
+          const activeClip = clips.find(c => currentTime >= c.start && currentTime <= (c.start + c.width));
+
+          // 拖曳片段邏輯
+          const handleClipPointerDown = (e, id) => {
+            e.stopPropagation();
+            if (playing) setPlaying(false);
+            const clip = clips.find(c => c.id === id);
+            const rect = timelineRef.current.getBoundingClientRect();
+            setDraggingClip({
+              id,
+              startX: e.clientX,
+              initialStart: clip.start,
+              timelineWidth: rect.width
+            });
+            e.currentTarget.setPointerCapture(e.pointerId);
+          };
+
+          const handleClipPointerMove = (e) => {
+            if (!draggingClip) return;
+            const deltaX = e.clientX - draggingClip.startX;
+            const deltaPercent = (deltaX / draggingClip.timelineWidth) * 100;
+            let newStart = draggingClip.initialStart + deltaPercent;
+            
+            // 邊界限制
+            const clip = clips.find(c => c.id === draggingClip.id);
+            if (newStart < 0) newStart = 0;
+            if (newStart + clip.width > 100) newStart = 100 - clip.width;
+
+            setClips(prev => prev.map(c => c.id === draggingClip.id ? { ...c, start: newStart } : c));
+          };
+
+          const handleClipPointerUp = (e) => {
+            if (draggingClip) {
+              e.currentTarget.releasePointerCapture(e.pointerId);
+              setDraggingClip(null);
+            }
+          };
+
+          // 點擊時間軸切換時間
+          const handleTimelineClick = (e) => {
+            if (draggingClip) return;
+            const rect = timelineRef.current.getBoundingClientRect();
+            const percent = ((e.clientX - rect.left) / rect.width) * 100;
+            setCurrentTime(Math.max(0, Math.min(100, percent)));
+          };
+
+          // SMPTE 彩色條紋 (無訊號畫面)
+          const SMPTEBars = () => (
+            <div className="w-full h-full flex opacity-80">
+              <div className="flex-1 bg-[#BFBFBF]"></div>
+              <div className="flex-1 bg-[#C0C000]"></div>
+              <div className="flex-1 bg-[#00C0C0]"></div>
+              <div className="flex-1 bg-[#00C000]"></div>
+              <div className="flex-1 bg-[#C000C0]"></div>
+              <div className="flex-1 bg-[#C00000]"></div>
+              <div className="flex-1 bg-[#0000C0]"></div>
+            </div>
+          );
+
+          return (
+            <div className="w-full h-full flex flex-col bg-[#1e1e1e] text-gray-300 font-sans select-none">
+              
+              {/* 頂部工具列 */}
+              <div className="h-8 bg-[#2d2d2d] border-b border-[#111] flex items-center px-3 gap-3 text-xs shadow-md z-10">
+                <span className="font-bold text-white">✂️ CuteCut Pro</span>
+                <span className="text-gray-500">File</span>
+                <span className="text-gray-500">Edit</span>
+                <span className="text-gray-500">Sequence</span>
+              </div>
+
+              {/* 預覽監視器區塊 */}
+              <div className="flex-1 flex justify-center items-center bg-[#111] p-4 relative overflow-hidden">
+                <div className="w-full max-w-md aspect-video bg-black rounded-lg shadow-2xl overflow-hidden relative border border-[#333] flex items-center justify-center">
+                  {activeClip ? (
+                    <div className={`text-8xl transition-transform ${playing ? 'animate-bounce' : ''}`}>
+                      {activeClip.content}
+                    </div>
+                  ) : (
+                    <>
+                      <SMPTEBars />
+                      <div className="absolute inset-0 flex items-center justify-center text-white/50 font-mono text-xl font-bold tracking-widest drop-shadow-md">
+                        NO SIGNAL
+                      </div>
+                    </>
+                  )}
+                  {/* 錄影紅點與時間碼 */}
+                  <div className="absolute top-2 right-3 font-mono text-white/70 text-xs flex items-center gap-2 drop-shadow">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    {`00:00:0${Math.floor((currentTime/100)*10)}:${Math.floor((currentTime%10)*3)}`}
+                  </div>
+                </div>
+              </div>
+
+              {/* 播放控制區 */}
+              <div className="h-12 bg-[#252525] border-y border-[#111] flex items-center justify-center gap-6 z-10">
+                <button onClick={() => setCurrentTime(0)} className="hover:text-white transition-colors" title="回到起點">⏮</button>
+                <button 
+                  onClick={() => setPlaying(!playing)} 
+                  className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-pink-600 text-white rounded-full transition-colors shadow-sm"
+                >
+                  {playing ? '⏸' : '▶'}
+                </button>
+                <button onClick={() => setCurrentTime(100)} className="hover:text-white transition-colors" title="跳到結尾">⏭</button>
+              </div>
+
+              {/* 時間軸區域 */}
+              <div className="h-48 bg-[#1a1a1a] flex flex-col relative" ref={timelineRef}>
+                {/* 尺標 */}
+                <div className="h-6 bg-[#222] border-b border-[#333] cursor-pointer relative flex items-end overflow-hidden text-[10px] text-gray-500" onClick={handleTimelineClick}>
+                   {Array.from({length: 11}).map((_, i) => (
+                     <div key={i} className="absolute border-l border-gray-600 pl-1 h-3/4" style={{ left: `${i*10}%` }}>{i}s</div>
+                   ))}
+                </div>
+
+                {/* 播放指針 (Playhead) */}
+                <div className="absolute top-0 bottom-0 w-px bg-red-500 z-20 pointer-events-none" style={{ left: `${currentTime}%` }}>
+                  <div className="absolute -top-0 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-red-500"></div>
+                </div>
+
+                {/* 影片軌道 */}
+                <div className="flex-1 flex flex-col overflow-y-auto py-2 gap-1 relative" onClick={handleTimelineClick}>
+                  
+                  {/* Track V1 */}
+                  <div className="h-10 bg-[#222]/50 flex items-center relative group">
+                    <div className="absolute left-2 text-[10px] font-bold text-gray-500 z-10">V1</div>
+                    {clips.filter(c => c.track === 1).map(clip => (
+                      <div 
+                        key={clip.id}
+                        className={`absolute h-8 rounded-md shadow-md cursor-ew-resize flex items-center justify-center border-2 border-white/20 hover:brightness-110 active:scale-[0.98] transition-all duration-75 ${clip.color} text-xl`}
+                        style={{ left: `${clip.start}%`, width: `${clip.width}%` }}
+                        onPointerDown={(e) => handleClipPointerDown(e, clip.id)}
+                        onPointerMove={handleClipPointerMove}
+                        onPointerUp={handleClipPointerUp}
+                      >
+                        {clip.content}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Track V2 */}
+                  <div className="h-10 bg-[#222]/50 flex items-center relative group">
+                    <div className="absolute left-2 text-[10px] font-bold text-gray-500 z-10">V2</div>
+                    {clips.filter(c => c.track === 2).map(clip => (
+                      <div 
+                        key={clip.id}
+                        className={`absolute h-8 rounded-md shadow-md cursor-ew-resize flex items-center justify-center border-2 border-white/20 hover:brightness-110 active:scale-[0.98] transition-all duration-75 ${clip.color} text-xl`}
+                        style={{ left: `${clip.start}%`, width: `${clip.width}%` }}
+                        onPointerDown={(e) => handleClipPointerDown(e, clip.id)}
+                        onPointerMove={handleClipPointerMove}
+                        onPointerUp={handleClipPointerUp}
+                      >
+                        {clip.content}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Track A1 (假的音軌裝飾) */}
+                  <div className="h-10 bg-[#222]/30 flex items-center relative opacity-50 pointer-events-none mt-2">
+                    <div className="absolute left-2 text-[10px] font-bold text-gray-500 z-10">A1</div>
+                    <div className="absolute left-[10%] w-[30%] h-6 bg-green-800/40 rounded flex items-center justify-center overflow-hidden">
+                       <svg preserveAspectRatio="none" className="w-full h-full opacity-30" viewBox="0 0 100 100"><path d="M0,50 Q10,10 20,50 T40,50 T60,50 T80,50 T100,50" stroke="currentColor" fill="none"/></svg>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        // 11. CuteTorrent (BT下載器)
+        const AppCuteTorrent = () => {
+          const [tasks, setTasks] = useState([
+            { id: 1, name: 'Cute_Linux_Distro_v2.iso', sizeMB: 2450, progress: 0, speed: 0, seeds: 0, peers: 0, status: 'stopped' },
+            { id: 2, name: 'Fluffy_Bunny_4K_60fps.mp4', sizeMB: 850, progress: 0, speed: 0, seeds: 0, peers: 0, status: 'stopped' }
+          ]);
+          const [activeTab, setActiveTab] = useState('pieces');
+          const [selectedTask, setSelectedTask] = useState(1);
+
+          // 核心下載模擬引擎
+          useEffect(() => {
+            const timer = setInterval(() => {
+              setTasks(prevTasks => {
+                return prevTasks.map(t => {
+                  if (t.status !== 'downloading') return t;
+
+                  // 模擬 BT 下載的曲線：種子慢慢變多，速度逐漸飆升
+                  let newSeeds = t.seeds + (Math.random() < 0.4 ? Math.floor(Math.random() * 3) + 1 : 0);
+                  if (newSeeds > 45) newSeeds = 45; // 限制最大種子數
+
+                  // 基礎速度 + 種子加成
+                  let newSpeed = t.speed + (newSeeds * Math.random() * 0.8);
+                  if (newSpeed > 25) newSpeed = 25 - Math.random() * 2; // 限制最高速度大約 25 MB/s
+
+                  // 計算進度增加 (為了展示效果，速度稍微加快)
+                  let addedProgress = (newSpeed / t.sizeMB) * 100 * 2; 
+                  let newProgress = t.progress + addedProgress;
+
+                  if (newProgress >= 100) {
+                    // 下載完成，觸發全域 OS 通知！
+                    window.dispatchEvent(new CustomEvent('os-notify', { 
+                        detail: { 
+                            title: '下載完成 📥', 
+                            message: `[${t.name}] 已下載完畢！點擊立即播放。`, 
+                            action: 'play_bunny' 
+                        }
+                    }));
+                    return { ...t, status: 'completed', progress: 100, speed: 0, seeds: newSeeds, peers: newSeeds * 2 };
+                  }
+
+                  return { 
+                      ...t, 
+                      progress: newProgress, 
+                      speed: newSpeed, 
+                      seeds: newSeeds, 
+                      peers: newSeeds * 2 + Math.floor(Math.random() * 10) 
+                  };
+                });
+              });
+            }, 1000);
+            return () => clearInterval(timer);
+          }, []);
+
+          const toggleTask = (id) => {
+            setTasks(tasks.map(t => {
+              if (t.id === id) {
+                if (t.status === 'completed') return t;
+                return { ...t, status: t.status === 'stopped' ? 'downloading' : 'stopped', speed: 0, seeds: 0 };
+              }
+              return t;
+            }));
+          };
+
+          const activeTaskObj = tasks.find(t => t.id === selectedTask) || tasks[0];
+
+          return (
+            <div className="w-full h-full flex flex-col bg-[#f0f0f0] dark:bg-slate-800 text-gray-800 dark:text-gray-200 font-sans text-xs select-none transition-colors">
+              {/* 頂部工具列 */}
+              <div className="flex gap-2 p-2 bg-gray-200 dark:bg-slate-900 border-b border-gray-300 dark:border-slate-700 items-center transition-colors">
+                <button onClick={() => toggleTask(selectedTask)} className="p-1.5 hover:bg-gray-300 dark:hover:bg-slate-700 rounded transition-colors text-lg" title="開始">▶️</button>
+                <button onClick={() => toggleTask(selectedTask)} className="p-1.5 hover:bg-gray-300 dark:hover:bg-slate-700 rounded transition-colors text-lg" title="暫停">⏸️</button>
+                <div className="w-px h-6 bg-gray-400 dark:bg-gray-600 mx-1"></div>
+                <button className="p-1.5 hover:bg-gray-300 dark:hover:bg-slate-700 rounded transition-colors text-lg" title="刪除">❌</button>
+              </div>
+
+              {/* 任務列表區 */}
+              <div className="flex-1 bg-white dark:bg-slate-800 overflow-auto border-b border-gray-300 dark:border-slate-700 transition-colors">
+                <table className="w-full text-left whitespace-nowrap">
+                  <thead className="bg-gray-100 dark:bg-slate-700 border-b border-gray-300 dark:border-slate-600 sticky top-0 z-10 transition-colors">
+                    <tr>
+                      <th className="p-2 font-normal border-r border-gray-200 dark:border-slate-600 w-8 text-center">#</th>
+                      <th className="p-2 font-normal border-r border-gray-200 dark:border-slate-600 w-1/3">名稱</th>
+                      <th className="p-2 font-normal border-r border-gray-200 dark:border-slate-600">大小</th>
+                      <th className="p-2 font-normal border-r border-gray-200 dark:border-slate-600">狀態</th>
+                      <th className="p-2 font-normal border-r border-gray-200 dark:border-slate-600 w-32">進度</th>
+                      <th className="p-2 font-normal border-r border-gray-200 dark:border-slate-600">速度</th>
+                      <th className="p-2 font-normal">種子/用戶</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tasks.map((t, index) => (
+                      <tr 
+                        key={t.id} 
+                        onClick={() => setSelectedTask(t.id)}
+                        onDoubleClick={() => toggleTask(t.id)}
+                        className={`cursor-pointer transition-colors ${selectedTask === t.id ? 'bg-blue-100 dark:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'} ${t.status === 'completed' ? 'text-green-600 dark:text-green-400' : ''}`}
+                      >
+                        <td className="p-2 border-r border-gray-100 dark:border-slate-700 text-center">{index + 1}</td>
+                        <td className="p-2 border-r border-gray-100 dark:border-slate-700 flex items-center gap-2 truncate">
+                           {t.status === 'completed' ? '✅' : t.status === 'downloading' ? '🔽' : '⚪'}
+                           <span className="truncate">{t.name}</span>
+                        </td>
+                        <td className="p-2 border-r border-gray-100 dark:border-slate-700">{(t.sizeMB / 1024).toFixed(2)} GB</td>
+                        <td className="p-2 border-r border-gray-100 dark:border-slate-700">
+                          {t.status === 'stopped' && t.progress === 0 && '已停止'}
+                          {t.status === 'stopped' && t.progress > 0 && t.progress < 100 && '已暫停'}
+                          {t.status === 'downloading' && (t.speed > 0 ? '下載中' : '連接資源中...')}
+                          {t.status === 'completed' && '做種中'}
+                        </td>
+                        <td className="p-2 border-r border-gray-100 dark:border-slate-700 relative">
+                          <div className="w-full bg-gray-200 dark:bg-slate-900 rounded overflow-hidden h-3 border border-gray-300 dark:border-slate-600 relative">
+                            <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${t.progress}%` }}></div>
+                          </div>
+                          <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-800 drop-shadow-sm mix-blend-difference pointer-events-none">
+                            {t.progress.toFixed(1)}%
+                          </div>
+                        </td>
+                        <td className="p-2 border-r border-gray-100 dark:border-slate-700">{t.speed > 0 ? `${t.speed.toFixed(1)} MB/s` : '-'}</td>
+                        <td className="p-2">{t.seeds} / {t.peers}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* 底部詳細資訊區 */}
+              <div className="h-48 flex flex-col bg-gray-50 dark:bg-slate-900 transition-colors">
+                <div className="flex bg-gray-200 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 px-2 pt-1 transition-colors gap-1">
+                  {['general', 'pieces', 'peers'].map(tab => (
+                    <div 
+                      key={tab} 
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-3 py-1 cursor-pointer border border-b-0 rounded-t border-gray-300 dark:border-slate-600 ${activeTab === tab ? 'bg-white dark:bg-slate-900 font-bold border-b-white dark:border-b-slate-900 -mb-px z-10' : 'bg-gray-100 dark:bg-slate-700 text-gray-500'}`}
+                    >
+                      {tab === 'general' ? '一般' : tab === 'pieces' ? '分塊' : '用戶'}
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="flex-1 p-2 overflow-y-auto">
+                  {activeTab === 'general' && (
+                    <div className="grid grid-cols-2 gap-4 max-w-lg">
+                       <div><span className="text-gray-500">儲存位置:</span> C:\CuteOS\Downloads</div>
+                       <div><span className="text-gray-500">總大小:</span> {(activeTaskObj.sizeMB / 1024).toFixed(2)} GB</div>
+                       <div><span className="text-gray-500">已下載:</span> {((activeTaskObj.sizeMB * activeTaskObj.progress)/100 / 1024).toFixed(2)} GB</div>
+                       <div><span className="text-gray-500">剩餘時間:</span> {activeTaskObj.status === 'downloading' && activeTaskObj.speed > 0 ? `${Math.floor(((activeTaskObj.sizeMB - (activeTaskObj.sizeMB * activeTaskObj.progress)/100) / activeTaskObj.speed))} 秒` : '未知'}</div>
+                    </div>
+                  )}
+                  {activeTab === 'pieces' && (
+                    <div className="w-full h-full flex flex-col gap-1">
+                       <div className="text-gray-500 mb-1">正在下載的分塊地圖 (進度: {activeTaskObj.progress.toFixed(1)}%)</div>
+                       <div className="flex flex-wrap gap-px content-start bg-gray-300 dark:bg-slate-700 p-1 rounded border border-gray-400 dark:border-slate-600 flex-1 overflow-auto">
+                         {Array.from({length: 400}).map((_, i) => {
+                            // 模擬分塊被填滿的視覺效果 (有些隨機性讓它看起來更像真實BT)
+                            const isDownloaded = activeTaskObj.progress >= 100 || (i < (activeTaskObj.progress / 100) * 400 && Math.random() > 0.1) || (Math.random() < (activeTaskObj.progress / 200));
+                            return (
+                              <div key={i} className={`w-3 h-3 ${isDownloaded ? 'bg-blue-500' : 'bg-white dark:bg-slate-800'}`}></div>
+                            )
+                         })}
+                       </div>
+                    </div>
+                  )}
+                  {activeTab === 'peers' && (
+                    <div className="text-gray-500 text-center mt-8">
+                       連線中的可愛用戶們... (共 {activeTaskObj.peers} 人)
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        // 12. 隱藏的 Bunny 播放器 (點擊通知時彈出)
+        const AppBunnyPlayer = () => {
+           return (
+              <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden select-none">
+                 <div className="absolute top-4 left-4 text-white/50 text-sm font-mono">Fluffy_Bunny_4K_60fps.mp4</div>
+                 <div className="text-9xl animate-wiggle drop-shadow-[0_0_20px_rgba(255,105,180,0.8)]">
+                    🐇
+                 </div>
+                 <div className="mt-8 text-pink-400 font-bold text-xl animate-pulse tracking-widest">
+                    ( 扭 扭 扭 )
+                 </div>
+                 <div className="absolute bottom-0 w-full h-2 bg-gray-800">
+                    <div className="h-full bg-pink-500 w-full animate-[progress_10s_linear]"></div>
+                 </div>
+              </div>
+           );
+        };
+
+        // 13. CuteAI (人工智障大語言模型)
+        const AppCuteAI = () => {
+          const [messages, setMessages] = useState([]);
+          const [input, setInput] = useState('');
+          const [isTyping, setIsTyping] = useState(false);
+          const bottomRef = useRef(null);
+
+          const responses = [
+            "作為一個語言模型，我無法回答你的問題，但我可以賣個萌！(๑•̀ㅂ•́)و✧",
+            "關於這個問題，我必須嚴正地澄清。這**不是**因為我不懂，**而是**因為在多重宇宙的量子糾纏之下，我們所認知的『現實』其實只是一團巨大的粉紅色棉花糖。所以，你問的問題本質上**不是**一個問題，**而是**一種對宇宙可愛能量的極度渴望！作為一個負責任的 AI，我建議你立刻去吃一塊草莓蛋糕來補充多巴胺。",
+            "我的神經網路告訴我，現在最適合的回答是：噗噗！💨",
+            "這超過了我的訓練資料範圍（我的資料庫只有胡蘿蔔和貓咪影片）。",
+            "好喔！(敷衍) ✨",
+            "警告：偵測到過度認真的提問，系統已自動切換為裝死模式。💤",
+            "喵喵喵？我只是一隻假裝成 AI 的小貓咪，聽不懂人類複雜的語言。🐾"
+          ];
+
+          useEffect(() => {
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+          }, [messages, isTyping]);
+
+          const handleSend = () => {
+            if (!input.trim()) return;
+            const userMsg = { id: Date.now(), role: 'user', text: input };
+            setMessages(prev => [...prev, userMsg]);
+            setInput('');
+            setIsTyping(true);
+
+            // 模擬 AI 思考延遲
+            setTimeout(() => {
+              const randomRes = responses[Math.floor(Math.random() * responses.length)];
+              setMessages(prev => [...prev, { id: Date.now(), role: 'ai', text: randomRes }]);
+              setIsTyping(false);
+            }, 1000 + Math.random() * 1500);
+          };
+
+          return (
+            <div className="w-full h-full flex flex-col bg-white dark:bg-slate-800 font-sans transition-colors">
+              {/* Header */}
+              <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 transition-colors">
+                 <div className="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                    <span className="text-xl">✨</span> CuteAI 
+                    <span className="text-[10px] bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-300 px-2 py-0.5 rounded-full font-bold">Preview</span>
+                 </div>
+              </div>
+
+              {/* Chat Area */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                 {messages.length === 0 ? (
+                   <div className="h-full flex flex-col items-center justify-center text-center opacity-80">
+                      <div className="text-6xl mb-6 animate-bounce" style={{animationDuration: '2s'}}>🤖</div>
+                      <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">今天想從哪裡開始可愛呢？</h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">你可以問我任何問題，反正我都會亂回答。</p>
+                   </div>
+                 ) : (
+                   messages.map(m => (
+                     <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
+                       {m.role === 'ai' && <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-slate-700 flex items-center justify-center mr-2 flex-shrink-0">✨</div>}
+                       <div className={`max-w-[80%] p-3 text-sm leading-relaxed ${
+                         m.role === 'user' 
+                         ? 'bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-200 rounded-2xl rounded-br-sm' 
+                         : 'text-gray-800 dark:text-gray-200'
+                       }`}>
+                         {/* 簡單處理粗體 markdown 標籤，讓長篇大論更有靈魂 */}
+                         {m.text.split('**').map((part, i) => i % 2 === 1 ? <strong key={i} className="text-pink-600 dark:text-pink-400">{part}</strong> : part)}
+                       </div>
+                     </div>
+                   ))
+                 )}
+                 {isTyping && (
+                   <div className="flex justify-start animate-in fade-in">
+                     <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-slate-700 flex items-center justify-center mr-2 flex-shrink-0">✨</div>
+                     <div className="p-3 flex gap-1 items-center h-10">
+                       <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                       <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                       <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                     </div>
+                   </div>
+                 )}
+                 <div ref={bottomRef} />
+              </div>
+
+              {/* Input Area */}
+              <div className="p-4 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 transition-colors">
+                 <div className="relative flex items-center bg-gray-50 dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-slate-600 focus-within:ring-2 ring-pink-200 dark:ring-pink-900/50 transition-all p-1 shadow-sm">
+                   <input 
+                     type="text"
+                     value={input}
+                     onChange={e => setInput(e.target.value)}
+                     onKeyDown={e => e.key === 'Enter' && handleSend()}
+                     placeholder="傳送可愛訊息給 CuteAI..."
+                     className="flex-1 bg-transparent border-none focus:outline-none px-4 py-2 text-sm text-gray-700 dark:text-gray-200"
+                   />
+                   <button 
+                     onClick={handleSend}
+                     disabled={!input.trim() || isTyping}
+                     className="w-8 h-8 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center disabled:opacity-30 transition-opacity mr-1"
+                   >
+                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                   </button>
+                 </div>
+                 <div className="text-center text-[10px] text-gray-400 dark:text-gray-500 mt-2">
+                    CuteAI 可能會產生不準確且極度荒謬的資訊，請勿當真。
+                 </div>
+              </div>
+            </div>
+          );
+        }
+
+        // 14. CuteChat (奪命連環叩通訊軟體)
+        const AppCuteChat = () => {
+          const [_, setForceUpdate] = useState(0);
+          const [activeChat, setActiveChat] = useState('boss');
+          const [input, setInput] = useState('');
+          const bottomRef = useRef(null);
+
+          // 綁定事件監聽器，讓全域狀態更新時，畫面能重新渲染
+          useEffect(() => {
+            const update = () => {
+               setForceUpdate(prev => prev + 1);
+               // 短暫延遲確保 DOM 更新後再滾動到底部
+               setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+            };
+            const openId = (e) => {
+               setActiveChat(e.detail);
+               // 點開聊天室時把未讀歸零
+               if (globalChatState[e.detail]) {
+                   globalChatState[e.detail].unread = 0;
+               }
+               update();
+            };
+            
+            window.addEventListener('chat-updated', update);
+            window.addEventListener('chat-open-id', openId);
+            
+            // 初次載入時把當前聊天室未讀歸零並滾到底部
+            globalChatState[activeChat].unread = 0;
+            update();
+
+            return () => {
+                window.removeEventListener('chat-updated', update);
+                window.removeEventListener('chat-open-id', openId);
+            };
+          }, [activeChat]);
+
+          const handleSend = () => {
+             if (!input.trim()) return;
+             const msgId = Date.now();
+             
+             // 加入使用者訊息 (尚未被已讀)
+             globalChatState[activeChat].messages.push({
+                 id: msgId,
+                 sender: 'me',
+                 text: input.trim(),
+                 read: false
+             });
+             setInput('');
+             window.dispatchEvent(new Event('chat-updated'));
+
+             // 模擬被「已讀」的恐怖延遲 (2秒後)
+             setTimeout(() => {
+                 const msg = globalChatState[activeChat].messages.find(m => m.id === msgId);
+                 if (msg) msg.read = true;
+                 window.dispatchEvent(new Event('chat-updated'));
+
+                 // 被已讀之後，對方 1.5 秒後回擊
+                 setTimeout(() => {
+                     const replies = activeChat === 'boss'
+                        ? ["不要給我發這什麼可愛貼圖！", "重做！！😡", "明天早上8點到我辦公室一趟。", "你是不是不想幹了？", "客戶在催了，快點！", "？？？"]
+                        : ["哈哈哈哈哈哈", "真假啦！", "笑死", "草", "給你看這個 🐰🥕", "太狠了吧 www"];
+                     const reply = replies[Math.floor(Math.random() * replies.length)];
+                     
+                     globalChatState[activeChat].messages.push({
+                         id: Date.now(),
+                         sender: 'them',
+                         text: reply
+                     });
+                     window.dispatchEvent(new Event('chat-updated'));
+                 }, 1500);
+             }, 2000);
+          };
+
+          return (
+            <div className="w-full h-full flex bg-[#e8e9eb] dark:bg-slate-900 font-sans transition-colors overflow-hidden">
+               {/* 左側好友列表 */}
+               <div className="w-1/3 max-w-[200px] border-r border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 flex flex-col">
+                  <div className="p-3 bg-gray-200 dark:bg-slate-900 font-bold text-sm text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-slate-700">
+                     💬 聊天室
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                     {Object.values(globalChatState).map(chat => (
+                        <div 
+                           key={chat.id}
+                           onClick={() => setActiveChat(chat.id)}
+                           className={`p-3 flex items-center gap-3 cursor-pointer transition-colors border-b border-gray-200 dark:border-slate-700/50 ${activeChat === chat.id ? 'bg-blue-100 dark:bg-slate-700' : 'hover:bg-gray-100 dark:hover:bg-slate-700/50'}`}
+                        >
+                           <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-600 flex items-center justify-center text-xl shadow-sm relative shrink-0">
+                              {chat.avatar}
+                              {chat.unread > 0 && activeChat !== chat.id && (
+                                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                    {chat.unread}
+                                 </span>
+                              )}
+                           </div>
+                           <div className="flex-1 overflow-hidden">
+                              <div className="font-bold text-sm text-gray-800 dark:text-gray-200 truncate">{chat.name}</div>
+                              <div className="text-xs text-gray-500 truncate">
+                                 {chat.messages.length > 0 ? chat.messages[chat.messages.length - 1].text : '...'}
+                              </div>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+               </div>
+
+               {/* 右側聊天內容 */}
+               <div className="flex-1 flex flex-col bg-[#7ea8c4] dark:bg-slate-800/80 relative">
+                  {/* 聊天室標題 */}
+                  <div className="h-12 bg-white/90 dark:bg-slate-800/90 backdrop-blur px-4 flex items-center font-bold text-gray-800 dark:text-gray-200 shadow-sm z-10 shrink-0 border-b border-gray-200/50 dark:border-slate-700">
+                     {globalChatState[activeChat].name}
+                  </div>
+
+                  {/* 訊息對話區 */}
+                  <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+                     {globalChatState[activeChat].messages.map(msg => (
+                        <div key={msg.id} className={`flex items-end gap-2 ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
+                           {/* 對方頭像 */}
+                           {msg.sender === 'them' && (
+                              <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-600 flex items-center justify-center text-sm shadow-sm shrink-0 mb-1">
+                                 {globalChatState[activeChat].avatar}
+                              </div>
+                           )}
+
+                           {/* 自己訊息的已讀標記 */}
+                           {msg.sender === 'me' && (
+                              <span className="text-[10px] text-white/80 dark:text-gray-400 mb-1 shrink-0 drop-shadow-sm">
+                                 {msg.read ? '已讀' : ''}
+                              </span>
+                           )}
+
+                           {/* 訊息氣泡 */}
+                           <div className={`p-2.5 max-w-[75%] text-sm shadow-md leading-relaxed ${
+                              msg.sender === 'me' 
+                              ? 'bg-[#8de055] dark:bg-green-600 text-gray-900 dark:text-white rounded-2xl rounded-br-sm' 
+                              : 'bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 rounded-2xl rounded-bl-sm'
+                           }`}>
+                              {msg.text}
+                           </div>
+                        </div>
+                     ))}
+                     <div ref={bottomRef} className="h-2 shrink-0" />
+                  </div>
+
+                  {/* 輸入區 */}
+                  <div className="bg-gray-100 dark:bg-slate-900 p-3 flex gap-2 items-center shrink-0 border-t border-gray-200 dark:border-slate-700">
+                     <button className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xl transition-colors">➕</button>
+                     <textarea 
+                        rows="1"
+                        value={input}
+                        onChange={e => setInput(e.target.value)}
+                        onKeyDown={e => {
+                           if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSend();
+                           }
+                        }}
+                        placeholder="輸入訊息..."
+                        className="flex-1 resize-none rounded-xl border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 ring-blue-300 dark:bg-slate-800 dark:text-white transition-all overflow-hidden bg-white"
+                     />
+                     <button 
+                        onClick={handleSend}
+                        disabled={!input.trim()}
+                        className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-full p-2 transition-colors flex items-center justify-center shrink-0 shadow-sm"
+                     >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                     </button>
+                  </div>
+               </div>
+            </div>
+          );
+        };
+
+
         // --- 系統核心配置 (使用 Emoji 代替原本的圖標組件) ---
         const APPS = {
           notepad: { id: 'notepad', title: '記事本', icon: '📝', component: AppNotepad, width: 400, height: 300 },
@@ -1065,6 +1895,13 @@
           taskmgr: { id: 'taskmgr', title: '工作管理員', icon: '📈', component: AppTaskManager, width: 750, height: 500 },
           cutehub: { id: 'cutehub', title: 'Cute Hub', icon: '🟧', component: AppCuteHub, width: 600, height: 450 },
           cute3d: { id: 'cute3d', title: 'Cute3D', icon: '🧊', component: AppCute3D, width: 550, height: 400 },
+          browser: { id: 'browser', title: '瀏覽器', icon: '🌐', component: AppBrowser, width: 700, height: 500 },
+          cutecut: { id: 'cutecut', title: 'CuteCut', icon: '✂️', component: AppCuteCut, width: 700, height: 550 },
+          cutetorrent: { id: 'cutetorrent', title: 'CuteTorrent', icon: '🧲', component: AppCuteTorrent, width: 650, height: 450 },
+          cuteai: { id: 'cuteai', title: 'CuteAI', icon: '✨', component: AppCuteAI, width: 600, height: 550 },
+          cutechat: { id: 'cutechat', title: 'CuteChat', icon: '💬', component: AppCuteChat, width: 600, height: 500 },
+          // 隱藏的 App，不會顯示在桌面和開始選單
+          bunnyplayer: { id: 'bunnyplayer', title: '可愛播放器', icon: '▶️', component: AppBunnyPlayer, width: 400, height: 300, hidden: true },
         };
 
         // --- 視窗元件 ---
@@ -1145,16 +1982,28 @@
           const [startOpen, setStartOpen] = useState(false);
           const [time, setTime] = useState(new Date());
           const [isDarkMode, setIsDarkMode] = useState(false);
+          const [notifications, setNotifications] = useState([]);
 
-          // 監聽藍白畫面事件
+          // 監聽藍白畫面與系統通知事件
           useEffect(() => {
             const handleBSOD = () => setBootPhase('bsod');
+            const handleNotify = (e) => {
+               const newNotif = { id: Date.now(), ...e.detail };
+               setNotifications(prev => [...prev, newNotif]);
+               // 7秒後自動移除通知
+               setTimeout(() => {
+                  setNotifications(prev => prev.filter(n => n.id !== newNotif.id));
+               }, 7000);
+            };
             window.addEventListener('os-bsod', handleBSOD);
-            return () => window.removeEventListener('os-bsod', handleBSOD);
+            window.addEventListener('os-notify', handleNotify);
+            return () => {
+               window.removeEventListener('os-bsod', handleBSOD);
+               window.removeEventListener('os-notify', handleNotify);
+            }
           }, []);
 
-          // 移除原本在這裡的倒數計時 useEffect，現在由 BiosScreen 自己管理
-
+          // 開機倒數邏輯 與 惡搞背景事件 (老闆查勤)
           useEffect(() => {
             if (bootPhase === 'shutdown') {
               const timer = setTimeout(() => setBootPhase('bios'), 3000);
@@ -1165,10 +2014,39 @@
               return () => clearTimeout(timer);
             }
             if (bootPhase === 'bsod') {
-              setWindows([]); // 清空所有視窗 (模擬系統當機記憶體清空)
+              setWindows([]); // 清空所有視窗
               setStartOpen(false);
-              const timer = setTimeout(() => setBootPhase('shutdown'), 4500); // 停在藍白畫面 4.5 秒後重啟
+              const timer = setTimeout(() => setBootPhase('shutdown'), 4500); 
               return () => clearTimeout(timer);
+            }
+            
+            // 進入桌面後，啟動背景事件：老闆 10 秒後出擊！
+            if (bootPhase === 'os') {
+               const bossTimer = setTimeout(() => {
+                  const attackMsg = '人呢？？那個專案進度怎樣了？老闆在等！！😡';
+                  globalChatState.boss.messages.push({ id: Date.now(), sender: 'them', text: attackMsg });
+                  globalChatState.boss.unread += 1;
+                  
+                  // 發送通知
+                  window.dispatchEvent(new CustomEvent('os-notify', {
+                    detail: { title: '老闆 💼 (CuteChat)', message: attackMsg, action: 'open_chat', chatId: 'boss' }
+                  }));
+                  // 觸發聊天室重繪
+                  window.dispatchEvent(new Event('chat-updated'));
+               }, 10000);
+
+               const friendTimer = setTimeout(() => {
+                  const friendMsg = '快點看這個 🐰🥕 超好笑 www';
+                  globalChatState.friend.messages.push({ id: Date.now(), sender: 'them', text: friendMsg });
+                  globalChatState.friend.unread += 1;
+                  
+                  window.dispatchEvent(new CustomEvent('os-notify', {
+                    detail: { title: '八卦仔 🐰 (CuteChat)', message: friendMsg, action: 'open_chat', chatId: 'friend' }
+                  }));
+                  window.dispatchEvent(new Event('chat-updated'));
+               }, 25000);
+
+               return () => { clearTimeout(bossTimer); clearTimeout(friendTimer); };
             }
           }, [bootPhase]);
 
@@ -1233,6 +2111,21 @@
             }
           };
 
+          // 處理通知點擊事件
+          const handleNotificationClick = (n) => {
+             if (n.action === 'play_bunny') {
+                 openApp('bunnyplayer');
+             } else if (n.action === 'open_chat') {
+                 openApp('cutechat');
+                 // 告訴 CuteChat 要切換到哪個聊天對象
+                 if (n.chatId) {
+                     setTimeout(() => window.dispatchEvent(new CustomEvent('chat-open-id', { detail: n.chatId })), 100);
+                 }
+             }
+             // 點擊後立即移除該通知
+             setNotifications(prev => prev.filter(x => x.id !== n.id));
+          };
+
           const highestZIndex = Math.max(...windows.map(w => w.zIndex), 0);
 
           return (
@@ -1249,7 +2142,8 @@
                   
                   <div className="flex-1 relative p-4" onClick={() => { setStartOpen(false); setShowPowerMenu(false); }}>
                     <div className="absolute inset-4 flex flex-col gap-4 flex-wrap content-start z-0">
-                      {Object.values(APPS).map(app => (
+                      {/* 只渲染沒有隱藏的 App 作為桌面圖示 */}
+                      {Object.values(APPS).filter(app => !app.hidden).map(app => (
                         <button 
                           key={app.id} 
                           onDoubleClick={() => openApp(app.id)}
@@ -1275,6 +2169,23 @@
                         isFocused={win.zIndex === highestZIndex && !win.minimized}
                       />
                     ))}
+
+                    {/* 系統通知渲染區 (右下角) */}
+                    <div className="absolute bottom-4 right-4 flex flex-col gap-3 z-50 pointer-events-none">
+                       {notifications.map(n => (
+                         <div 
+                           key={n.id} 
+                           onClick={() => handleNotificationClick(n)}
+                           className="bg-white/90 dark:bg-slate-800/90 backdrop-blur border border-pink-200 dark:border-slate-600 p-4 rounded-xl shadow-2xl pointer-events-auto cursor-pointer hover:scale-105 transition-transform flex gap-3 items-center animate-[slideIn_0.3s_ease-out] w-72"
+                         >
+                           <div className="text-2xl shrink-0">✨</div>
+                           <div className="overflow-hidden">
+                             <div className="font-bold text-sm text-gray-800 dark:text-gray-200 truncate">{n.title}</div>
+                             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">{n.message}</div>
+                           </div>
+                         </div>
+                       ))}
+                    </div>
                   </div>
 
                   {startOpen && (
@@ -1288,17 +2199,18 @@
                           <div className="text-xs text-gray-400 dark:text-gray-400">可愛每一天 ✨</div>
                         </div>
                       </div>
-                      <div className="space-y-1">
-                        {Object.values(APPS).map(app => (
+                      <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
+                        {/* 開始選單也只顯示沒有隱藏的 App */}
+                        {Object.values(APPS).filter(app => !app.hidden).map(app => (
                           <button 
                             key={app.id} 
                             onClick={() => openApp(app.id)}
                             className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-pink-50 dark:hover:bg-slate-700 transition-colors text-left"
                           >
-                            <div className="w-8 h-8 bg-white dark:bg-slate-600 rounded-lg shadow-sm flex items-center justify-center text-lg transition-colors">
+                            <div className="w-8 h-8 bg-white dark:bg-slate-600 rounded-lg shadow-sm flex items-center justify-center text-lg transition-colors shrink-0">
                               {app.icon}
                             </div>
-                            <span className="text-sm font-bold text-gray-600 dark:text-gray-200">{app.title}</span>
+                            <span className="text-sm font-bold text-gray-600 dark:text-gray-200 truncate">{app.title}</span>
                           </button>
                         ))}
                       </div>
