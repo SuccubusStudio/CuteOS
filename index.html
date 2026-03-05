@@ -306,6 +306,105 @@
           </div>
         );
 
+        // --- 特製 SVG 桌布元件 (呆萌版 Win11) ---
+        const DerpyWin11Wallpaper = ({ isDark }) => {
+          const c1 = isDark ? "#0f172a" : "#bae6fd"; // 外圍底色
+          const c2 = isDark ? "#1e40af" : "#60a5fa"; // 中間層
+          const c3 = isDark ? "#06b6d4" : "#3b82f6"; // 亮部 (深色帶點青色)
+          const c4 = isDark ? "#020617" : "#1d4ed8"; // 最深陰影
+
+          return (
+            <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center z-0 transition-colors duration-700">
+              <svg className="w-[150vw] h-[150vh] sm:w-[120vw] sm:h-[120vh] max-w-none opacity-90 mix-blend-normal" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <linearGradient id="w11-grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor={c1} />
+                    <stop offset="100%" stopColor={c4} />
+                  </linearGradient>
+                  <linearGradient id="w11-grad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor={c2} />
+                    <stop offset="100%" stopColor={c4} />
+                  </linearGradient>
+                  <linearGradient id="w11-grad3" x1="50%" y1="0%" x2="50%" y2="100%">
+                    <stop offset="0%" stopColor={c3} />
+                    <stop offset="100%" stopColor={c2} />
+                  </linearGradient>
+                </defs>
+                
+                {/* 致敬 Win11 的布料/花瓣層疊，但故意弄得圓潤肥滿一點 */}
+                <path d="M 100,900 C -50,500 350,50 600,250 C 850,450 750,850 900,900 Z" fill="url(#w11-grad1)" />
+                <path d="M 0,900 C 250,550 450,150 700,300 C 950,450 850,750 1000,900 Z" fill="url(#w11-grad2)" opacity="0.8" />
+                <path d="M 350,900 C 250,450 600,200 800,350 C 1000,500 750,850 650,900 Z" fill="url(#w11-grad3)" opacity="0.9" />
+                <path d="M 250,900 C 350,550 700,300 850,450 C 1000,600 850,850 800,900 Z" fill="url(#w11-grad1)" opacity="0.7" />
+
+                {/* 藏在花瓣裡面的靈魂呆萌小臉 (・∀・) */}
+                <g transform="translate(640, 400)">
+                   <circle cx="-35" cy="0" r="9" fill={c4} opacity="0.7"/>
+                   <circle cx="35" cy="0" r="9" fill={c4} opacity="0.7"/>
+                   <path d="M -15,15 Q 0,30 15,15" fill="none" stroke={c4} strokeWidth="6" strokeLinecap="round" opacity="0.7"/>
+                   {/* 腮紅 */}
+                   <ellipse cx="-55" cy="12" rx="14" ry="8" fill="#f472b6" opacity="0.5"/>
+                   <ellipse cx="55" cy="12" rx="14" ry="8" fill="#f472b6" opacity="0.5"/>
+                </g>
+              </svg>
+            </div>
+          );
+        };
+
+        // --- 特製 SVG 桌布元件 (經典草地 XP 版) ---
+        const DerpyXPWallpaper = ({ isDark }) => {
+          const skyTop = isDark ? "#020617" : "#2563eb"; 
+          const skyBottom = isDark ? "#1e1b4b" : "#93c5fd";
+          const hillBack = isDark ? "#064e3b" : "#65a30d";
+          const hillFront = isDark ? "#022c22" : "#4ade80";
+          const cloudColor = isDark ? "#334155" : "#ffffff";
+          const faceColor = isDark ? "#0f172a" : "#334155";
+
+          return (
+            <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center z-0 transition-colors duration-700">
+              <svg className="w-full h-full object-cover min-w-[1000px] min-h-[800px] mix-blend-normal" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <linearGradient id="xp-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor={skyTop} />
+                    <stop offset="100%" stopColor={skyBottom} />
+                  </linearGradient>
+                </defs>
+                {/* 天空 */}
+                <rect width="1000" height="800" fill="url(#xp-sky)" className="transition-all duration-700" />
+                
+                {/* 呆萌白雲 (・∀・) */}
+                <g transform="translate(250, 250)" className="transition-all duration-700">
+                   <circle cx="-60" cy="10" r="40" fill={cloudColor} className="transition-colors duration-700" />
+                   <circle cx="0" cy="-20" r="60" fill={cloudColor} className="transition-colors duration-700" />
+                   <circle cx="60" cy="10" r="50" fill={cloudColor} className="transition-colors duration-700" />
+                   <circle cx="-100" cy="30" r="30" fill={cloudColor} className="transition-colors duration-700" />
+                   <circle cx="100" cy="30" r="35" fill={cloudColor} className="transition-colors duration-700" />
+                   <rect x="-100" y="10" width="200" height="50" fill={cloudColor} className="transition-colors duration-700" />
+                   {/* 臉 */}
+                   <circle cx="-20" cy="10" r="5" fill={faceColor} className="transition-colors duration-700" />
+                   <circle cx="20" cy="10" r="5" fill={faceColor} className="transition-colors duration-700" />
+                   <path d="M -6,25 Q 0,35 6,25" fill="none" stroke={faceColor} strokeWidth="4" strokeLinecap="round" className="transition-colors duration-700" />
+                   <ellipse cx="-35" cy="15" rx="10" ry="6" fill="#f472b6" opacity={isDark ? "0.3" : "0.6"} className="transition-opacity duration-700"/>
+                   <ellipse cx="35" cy="15" rx="10" ry="6" fill="#f472b6" opacity={isDark ? "0.3" : "0.6"} className="transition-opacity duration-700"/>
+                </g>
+
+                {/* 第二朵普通雲 */}
+                <g transform="translate(750, 180) scale(0.7)" opacity="0.8" className="transition-all duration-700">
+                   <circle cx="-60" cy="10" r="40" fill={cloudColor} className="transition-colors duration-700"/>
+                   <circle cx="0" cy="-20" r="60" fill={cloudColor} className="transition-colors duration-700"/>
+                   <circle cx="60" cy="10" r="50" fill={cloudColor} className="transition-colors duration-700"/>
+                   <rect x="-60" y="10" width="120" height="50" fill={cloudColor} className="transition-colors duration-700"/>
+                </g>
+
+                {/* 遠處的山丘 */}
+                <path d="M -100,550 Q 250,450 600,600 T 1100,500 L 1100,900 L -100,900 Z" fill={hillBack} className="transition-colors duration-700" />
+                {/* 近處的草地 */}
+                <path d="M -100,800 Q 300,450 1100,750 L 1100,900 L -100,900 Z" fill={hillFront} className="transition-colors duration-700" />
+              </svg>
+            </div>
+          );
+        };
+
         // --- 各式小應用程式 (Apps) ---
 
         // 1. 記事本
@@ -1884,6 +1983,316 @@
           );
         };
 
+        // 15. CuteMiner (可愛挖礦機)
+        const AppCuteMiner = () => {
+          const [isMining, setIsMining] = useState(false);
+          const [logs, setLogs] = useState(["[系統] CuteMiner v1.0.0 初始化完成。", "[系統] 準備就緒。等待開挖..."]);
+          const [stats, setStats] = useState({ hashrate: 0, coins: 0.000000, temp: 42 });
+          const logsEndRef = useRef(null);
+
+          useEffect(() => {
+            if (logsEndRef.current) {
+              logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+            }
+          }, [logs]);
+
+          useEffect(() => {
+            let interval;
+            if (isMining) {
+              interval = setInterval(() => {
+                setStats(prev => {
+                  const newHashrate = Math.floor(Math.random() * 50) + 80; // 80 - 130 MH/s
+                  const coinFound = Math.random() > 0.8; // 20% 機率挖到
+                  const newTemp = Math.min(95, prev.temp + (Math.random() > 0.4 ? 1 : -1)); // 溫度緩慢上升
+                  const addedCoin = coinFound ? (Math.random() * 0.005) : 0;
+                  
+                  setLogs(prevLogs => {
+                    const newLogs = [...prevLogs];
+                    if (newLogs.length > 50) newLogs.shift(); // 最多保留 50 行避免卡頓
+                    const time = new Date().toLocaleTimeString();
+                    if (coinFound) {
+                       newLogs.push(`[${time}] ⚠️ 發現區塊！獲得 ${addedCoin.toFixed(4)} 蘿蔔幣 (CTC) 🥕`);
+                    } else {
+                       newLogs.push(`[${time}] 運算中... 雜湊率: ${newHashrate} MH/s`);
+                    }
+                    return newLogs;
+                  });
+
+                  return { hashrate: newHashrate, coins: prev.coins + addedCoin, temp: newTemp };
+                });
+              }, 800);
+            } else {
+              // 停止挖礦時的降溫邏輯
+              interval = setInterval(() => {
+                setStats(prev => {
+                   if (prev.temp <= 42) return prev;
+                   return { ...prev, hashrate: 0, temp: Math.max(42, prev.temp - 2) };
+                });
+              }, 1000);
+            }
+            return () => clearInterval(interval);
+          }, [isMining]);
+
+          return (
+            <div className="w-full h-full flex flex-col bg-[#0a0a0a] text-green-400 font-mono text-xs select-none">
+              {/* 頂部數據面板 */}
+              <div className="p-3 bg-[#111] border-b border-[#333] flex justify-between items-center shadow-md z-10 flex-wrap gap-2">
+                 <div className="flex items-center gap-4">
+                    <div className="flex flex-col">
+                       <span className="text-gray-500 text-[10px]">我的錢包 (CTC)</span>
+                       <span className="text-lg font-bold text-yellow-400">🥕 {stats.coins.toFixed(6)}</span>
+                    </div>
+                    <div className="h-8 w-px bg-[#333] hidden sm:block"></div>
+                    <div className="flex flex-col">
+                       <span className="text-gray-500 text-[10px]">雜湊率 (Hashrate)</span>
+                       <span className="text-sm font-bold">{stats.hashrate} MH/s</span>
+                    </div>
+                    <div className="flex flex-col">
+                       <span className="text-gray-500 text-[10px]">GPU 溫度</span>
+                       <span className={`text-sm font-bold ${stats.temp > 85 ? 'text-red-500 animate-pulse' : stats.temp > 70 ? 'text-orange-400' : 'text-green-400'}`}>
+                         {stats.temp} °C
+                       </span>
+                    </div>
+                 </div>
+                 <button 
+                    onClick={() => setIsMining(!isMining)}
+                    className={`px-6 py-2 rounded font-bold text-sm transition-all shadow-lg flex items-center gap-2 ${isMining ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}
+                 >
+                    {isMining ? '⏹ 停止挖礦' : '⛏️ 開始挖礦'}
+                 </button>
+              </div>
+
+              {/* 終端機日誌區域 */}
+              <div className="flex-1 p-3 overflow-y-auto font-mono text-[11px] leading-relaxed relative">
+                 {/* 淡淡的背景裝飾 */}
+                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]">
+                     <div className="text-[200px]">🥕</div>
+                 </div>
+                 {logs.map((log, i) => (
+                    <div key={i} className={`${log.includes('獲得') ? 'text-yellow-400 font-bold bg-yellow-400/10 p-1 rounded my-0.5' : 'text-green-500/80'}`}>
+                       {log}
+                    </div>
+                 ))}
+                 <div ref={logsEndRef} />
+              </div>
+
+              {/* 底部狀態列 */}
+              <div className="p-1.5 bg-[#111] border-t border-[#333] text-[10px] text-gray-500 flex justify-between">
+                 <span className="flex items-center gap-2">
+                   {isMining ? <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> : <span className="w-2 h-2 rounded-full bg-gray-500"></span>}
+                   伺服器狀態: {isMining ? '連線中 (cute-pool.asia)' : '已離線'}
+                 </span>
+                 <span>CuteMiner Pro v1.0</span>
+              </div>
+            </div>
+          );
+        };
+
+        // 16. CuteBrush (專業 3D 雕刻軟體 - 大便產生器)
+        const AppCuteBrush = () => {
+          const canvasRef = useRef(null);
+          const [progress, setProgress] = useState(0); // 雕刻進度 0 到 100
+          const [isDragging, setIsDragging] = useState(false);
+          const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
+
+          // 處理 Canvas 響應式大小與重繪
+          useEffect(() => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            const observer = new ResizeObserver((entries) => {
+              for (let entry of entries) {
+                canvas.width = entry.contentRect.width;
+                canvas.height = entry.contentRect.height;
+                setMousePos(p => ({ ...p })); // 強制重繪
+              }
+            });
+            observer.observe(canvas);
+            return () => observer.disconnect();
+          }, []);
+
+          // 核心 ZBrush Red Wax 渲染引擎
+          useEffect(() => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // ZBrush 經典深灰漸層背景
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+            bgGrad.addColorStop(0, '#3a3a3a');
+            bgGrad.addColorStop(1, '#1e1e1e');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, w, h);
+
+            const centerX = w / 2;
+            const centerY = h / 2 + 30;
+
+            // 繪製 ZBrush 經典深紅蠟 (MatCap Red Wax) 材質球的函數
+            const drawWaxSphere = (cx, cy, r) => {
+              if (r <= 0) return;
+              // 高光偏移到左上方
+              const grad = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.35, r * 0.05, cx, cy, r);
+              grad.addColorStop(0, '#fca5a5');    // 銳利高光
+              grad.addColorStop(0.1, '#ef4444');  // 亮紅
+              grad.addColorStop(0.5, '#991b1b');  // 蠟質主色
+              grad.addColorStop(0.85, '#450a0a'); // 深色陰影
+              grad.addColorStop(1, '#2a0606');    // 邊緣反光收斂
+
+              ctx.beginPath();
+              ctx.arc(cx, cy, r, 0, Math.PI * 2);
+              ctx.fillStyle = grad;
+              ctx.fill();
+            };
+
+            // 1. 繪製基底球體 (隨著雕刻進度縮小)
+            const baseR = 120 * Math.max(0, (1 - progress / 60)); // 進度到 60% 時底球完全消失
+            if (baseR > 0) {
+              drawWaxSphere(centerX, centerY, baseR);
+            }
+
+            // 2. 繪製長出來的大便螺旋 (隨著進度增加)
+            const numBlobs = Math.floor(progress * 5); // 最多 500 顆球疊加出滑順的 3D 管狀
+            for (let i = 0; i < numBlobs; i++) {
+              const t = i / 500;
+              const angle = t * Math.PI * 10; // 盤旋 5 圈
+              const coilR = 80 * (1 - t); // 螺旋半徑越往上越小
+              
+              const px = centerX + Math.cos(angle) * coilR;
+              // 加入一點正弦波讓便便有下垂的重力感，並往上長
+              const py = centerY + 60 - (t * 220) + Math.sin(angle) * 12;
+              
+              const blobR = 50 * (1 - t * 0.75); // 管子本身的粗細越往上越細
+              drawWaxSphere(px, py, blobR);
+            }
+
+            // 3. 繪製 ZBrush 專業雕刻筆刷游標
+            if (mousePos.x > 0 || mousePos.y > 0) {
+              ctx.beginPath();
+              ctx.arc(mousePos.x, mousePos.y, 30, 0, Math.PI * 2);
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+              
+              ctx.beginPath();
+              ctx.arc(mousePos.x, mousePos.y, 40, 0, Math.PI * 2);
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+              ctx.stroke();
+
+              ctx.beginPath();
+              ctx.arc(mousePos.x, mousePos.y, 2, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+              ctx.fill();
+            }
+          }, [progress, mousePos]);
+
+          // 塗抹交互邏輯
+          const handlePointerDown = (e) => {
+            setIsDragging(true);
+            updateSculpt();
+          };
+
+          const handlePointerMove = (e) => {
+            const rect = canvasRef.current.getBoundingClientRect();
+            setMousePos({
+              x: e.clientX - rect.left,
+              y: e.clientY - rect.top
+            });
+            if (isDragging) updateSculpt();
+          };
+
+          const handlePointerUp = () => setIsDragging(false);
+
+          const updateSculpt = () => {
+            // 每塗抹一次，進度就增加，慢慢逼近 100% 完美大便
+            setProgress(p => Math.min(100, p + 0.6));
+          };
+
+          const resetMesh = () => setProgress(0);
+
+          return (
+            <div className="w-full h-full flex flex-col bg-[#222] text-gray-300 font-sans select-none overflow-hidden text-xs">
+              {/* 頂部工具列 */}
+              <div className="h-10 bg-[#333] border-b border-[#111] flex items-center px-2 gap-4">
+                <span className="font-bold text-orange-400 text-sm">CuteBrush 2026</span>
+                <span className="hover:text-white cursor-pointer hidden sm:block">Alpha</span>
+                <span className="hover:text-white cursor-pointer hidden sm:block">Brush</span>
+                <span className="hover:text-white cursor-pointer hidden sm:block">Color</span>
+                <span className="hover:text-white cursor-pointer hidden sm:block">Document</span>
+                
+                <div className="flex-1 flex justify-center items-center gap-4">
+                  <div className="flex items-center gap-1">
+                    <span>Draw Size</span>
+                    <div className="w-24 h-1.5 bg-gray-600 rounded-full relative"><div className="w-1/3 h-full bg-orange-400 rounded-full"></div></div>
+                    <span>64</span>
+                  </div>
+                  <div className="flex items-center gap-1 hidden sm:flex">
+                    <span>Z Intensity</span>
+                    <div className="w-20 h-1.5 bg-gray-600 rounded-full relative"><div className="w-1/2 h-full bg-orange-400 rounded-full"></div></div>
+                    <span>50</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 flex relative">
+                {/* 左側筆刷列 */}
+                <div className="w-14 bg-[#2a2a2a] border-r border-[#111] flex flex-col gap-2 p-1 items-center overflow-y-auto">
+                  {['Std', 'Clay', 'Move', 'Dam', 'hPol', 'Inflat'].map((br, i) => (
+                    <button key={i} className={`w-10 h-10 rounded shadow-sm border border-[#444] text-[10px] flex items-center justify-center font-bold hover:bg-[#444] transition-colors ${i===0 ? 'bg-[#444] text-orange-400' : 'bg-[#333]'}`}>
+                      {br}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 中央雕刻畫布 */}
+                <div className="flex-1 relative cursor-crosshair">
+                   <canvas 
+                      ref={canvasRef}
+                      className="absolute inset-0 w-full h-full touch-none"
+                      onPointerDown={handlePointerDown}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      onPointerLeave={handlePointerUp}
+                   />
+                   {/* 教學文字 */}
+                   {progress === 0 && (
+                     <div className="absolute top-1/4 left-1/2 -translate-x-1/2 text-gray-400 font-bold pointer-events-none animate-pulse drop-shadow-md text-sm">
+                       請用滑鼠在球體上塗抹雕刻...
+                     </div>
+                   )}
+                   {progress >= 100 && (
+                     <div className="absolute top-10 left-1/2 -translate-x-1/2 text-orange-400 font-bold pointer-events-none drop-shadow-md bg-black/50 px-4 py-2 rounded-full border border-orange-500/50">
+                       大師級傑作！無論怎麼雕刻，最終都會化為一坨大便。
+                     </div>
+                   )}
+                </div>
+
+                {/* 右側工具列 */}
+                <div className="w-32 bg-[#2a2a2a] border-l border-[#111] flex flex-col p-2 gap-3 items-center">
+                  <div className="w-full text-center text-gray-500 font-bold border-b border-[#444] pb-1 mb-1">Tool</div>
+                  
+                  {/* 假裝是目前工具的預覽 */}
+                  <div className="w-20 h-20 bg-[#333] border-2 border-gray-500 rounded-lg flex items-center justify-center shadow-inner relative overflow-hidden">
+                     {/* 簡單畫個深紅材質球當 Icon */}
+                     <div className="w-14 h-14 rounded-full bg-gradient-to-br from-red-400 via-red-800 to-black shadow-lg"></div>
+                  </div>
+                  
+                  <button onClick={resetMesh} className="w-full py-1 bg-[#444] hover:bg-orange-500 hover:text-white rounded border border-[#111] transition-colors mt-2">
+                    Clear / 重置
+                  </button>
+
+                  <div className="w-full h-px bg-[#444] my-2"></div>
+                  
+                  <button className="w-12 h-10 bg-[#333] hover:bg-[#444] rounded border border-[#222] flex items-center justify-center text-xs">BPR</button>
+                  <button className="w-12 h-10 bg-[#333] hover:bg-[#444] rounded border border-[#222] flex items-center justify-center text-xs">PolyF</button>
+                  <button className="w-12 h-10 bg-[#444] text-orange-400 rounded border border-[#222] flex items-center justify-center text-xs font-bold shadow-inner">Persp</button>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
 
         // --- 系統核心配置 (使用 Emoji 代替原本的圖標組件) ---
         const APPS = {
@@ -1900,6 +2309,8 @@
           cutetorrent: { id: 'cutetorrent', title: 'CuteTorrent', icon: '🧲', component: AppCuteTorrent, width: 650, height: 450 },
           cuteai: { id: 'cuteai', title: 'CuteAI', icon: '✨', component: AppCuteAI, width: 600, height: 550 },
           cutechat: { id: 'cutechat', title: 'CuteChat', icon: '💬', component: AppCuteChat, width: 600, height: 500 },
+          cuteminer: { id: 'cuteminer', title: 'CuteMiner', icon: '⛏️', component: AppCuteMiner, width: 600, height: 400 },
+          cutebrush: { id: 'cutebrush', title: 'CuteBrush', icon: '🖌️', component: AppCuteBrush, width: 750, height: 550 },
           // 隱藏的 App，不會顯示在桌面和開始選單
           bunnyplayer: { id: 'bunnyplayer', title: '可愛播放器', icon: '▶️', component: AppBunnyPlayer, width: 400, height: 300, hidden: true },
         };
@@ -1984,6 +2395,8 @@
           const [time, setTime] = useState(new Date());
           const [isDarkMode, setIsDarkMode] = useState(false);
           const [notifications, setNotifications] = useState([]);
+          const [wallpaper, setWallpaper] = useState('default'); // 新增桌布狀態
+          const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0 }); // 新增右鍵選單狀態
 
           // 監聽藍白畫面與系統通知事件
           useEffect(() => {
@@ -2133,6 +2546,14 @@
 
           const highestZIndex = Math.max(...windows.map(w => w.zIndex), 0);
 
+          // 桌布主題 CSS 設定 (更新 win11 的底色，並用元件渲染漸層布料)
+          const WALLPAPERS = {
+            default: "bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 dark:from-slate-900 dark:via-indigo-950 dark:to-fuchsia-950",
+            win11: "bg-[#e0f2fe] dark:bg-[#020617]", 
+            mint: "bg-gradient-to-tr from-green-50 via-emerald-100 to-teal-100 dark:from-slate-900 dark:via-teal-950 dark:to-emerald-950",
+            xp: "bg-blue-300 dark:bg-slate-900" // 給 XP 一個底色，上面會覆蓋 SVG
+          };
+
           return (
             <div className={isDarkMode ? 'dark' : ''}>
               {bootPhase === 'bios' && <BiosScreen onEnterSetup={() => setBootPhase('bios-setup')} onContinue={() => setBootPhase('dos')} />}
@@ -2143,9 +2564,28 @@
               {bootPhase === 'bsod' && <BSODScreen />}
               
               {bootPhase === 'os' && (
-                <div className="w-full h-screen overflow-hidden bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 dark:from-slate-900 dark:via-indigo-950 dark:to-fuchsia-950 relative font-sans select-none flex flex-col transition-colors duration-500">
+                <div className={`w-full h-screen overflow-hidden ${WALLPAPERS[wallpaper]} relative font-sans select-none flex flex-col transition-all duration-700`}>
                   
-                  <div className="flex-1 relative p-4" onClick={() => { setStartOpen(false); setShowPowerMenu(false); }}>
+                  {/* 渲染呆萌 Win11 SVG 桌布 */}
+                  {wallpaper === 'win11' && <DerpyWin11Wallpaper isDark={isDarkMode} />}
+                  {/* 渲染經典草地 XP SVG 桌布 */}
+                  {wallpaper === 'xp' && <DerpyXPWallpaper isDark={isDarkMode} />}
+
+                  <div 
+                    className="flex-1 relative p-4 z-10" 
+                    onClick={() => { setStartOpen(false); setShowPowerMenu(false); setContextMenu({ ...contextMenu, show: false }); }}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      setStartOpen(false);
+                      setShowPowerMenu(false);
+                      let x = e.clientX;
+                      let y = e.clientY;
+                      // 邊界偵測避免選單跑出螢幕外
+                      if (x + 208 > window.innerWidth) x = window.innerWidth - 208;
+                      if (y + 160 > window.innerHeight) y = window.innerHeight - 160;
+                      setContextMenu({ show: true, x, y });
+                    }}
+                  >
                     <div className="absolute inset-4 flex flex-col gap-4 flex-wrap content-start z-0">
                       {/* 只渲染沒有隱藏的 App 作為桌面圖示 */}
                       {Object.values(APPS).filter(app => !app.hidden).map(app => (
@@ -2174,6 +2614,45 @@
                         isFocused={win.zIndex === highestZIndex && !win.minimized}
                       />
                     ))}
+
+                    {/* 桌布右鍵選單 */}
+                    {contextMenu.show && (
+                      <div 
+                        className="absolute bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-gray-200 dark:border-slate-700 shadow-2xl rounded-xl py-2 w-52 z-[100] animate-in fade-in zoom-in-95 duration-100"
+                        style={{ left: contextMenu.x, top: contextMenu.y }}
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <div className="px-4 py-1.5 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">個人化設定</div>
+                        <button 
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-pink-50 dark:hover:bg-slate-700 flex items-center gap-3 transition-colors" 
+                          onClick={() => { setWallpaper('default'); setContextMenu({...contextMenu, show: false}); }}
+                        >
+                          <div className={`w-4 h-4 rounded-full bg-gradient-to-br from-indigo-100 to-pink-200 ${wallpaper === 'default' ? 'ring-2 ring-pink-400 ring-offset-2 dark:ring-offset-slate-800' : ''}`}></div> 
+                          <span className={wallpaper === 'default' ? 'font-bold text-pink-500 dark:text-pink-400' : ''}>預設粉嫩</span>
+                        </button>
+                        <button 
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-slate-700 flex items-center gap-3 transition-colors" 
+                          onClick={() => { setWallpaper('win11'); setContextMenu({...contextMenu, show: false}); }}
+                        >
+                          <div className={`w-4 h-4 rounded-full bg-gradient-to-br from-blue-200 to-indigo-300 ${wallpaper === 'win11' ? 'ring-2 ring-blue-400 ring-offset-2 dark:ring-offset-slate-800' : ''}`}></div> 
+                          <span className={wallpaper === 'win11' ? 'font-bold text-blue-500 dark:text-blue-400' : ''}>蔚藍綻放 (Win11)</span>
+                        </button>
+                        <button 
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-slate-700 flex items-center gap-3 transition-colors" 
+                          onClick={() => { setWallpaper('mint'); setContextMenu({...contextMenu, show: false}); }}
+                        >
+                          <div className={`w-4 h-4 rounded-full bg-gradient-to-br from-teal-200 to-emerald-200 ${wallpaper === 'mint' ? 'ring-2 ring-teal-400 ring-offset-2 dark:ring-offset-slate-800' : ''}`}></div> 
+                          <span className={wallpaper === 'mint' ? 'font-bold text-teal-500 dark:text-teal-400' : ''}>清新薄荷</span>
+                        </button>
+                        <button 
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-slate-700 flex items-center gap-3 transition-colors border-t border-gray-100 dark:border-slate-700 mt-1 pt-3" 
+                          onClick={() => { setWallpaper('xp'); setContextMenu({...contextMenu, show: false}); }}
+                        >
+                          <div className={`w-4 h-4 rounded-full bg-gradient-to-b from-blue-400 to-green-400 ${wallpaper === 'xp' ? 'ring-2 ring-green-500 ring-offset-2 dark:ring-offset-slate-800' : ''}`}></div> 
+                          <span className={wallpaper === 'xp' ? 'font-bold text-green-600 dark:text-green-500' : ''}>經典草地 (XP)</span>
+                        </button>
+                      </div>
+                    )}
 
                     {/* 系統通知渲染區 (右下角) */}
                     <div className="absolute bottom-4 right-4 flex flex-col gap-3 z-50 pointer-events-none">
