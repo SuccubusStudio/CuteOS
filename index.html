@@ -31,6 +31,19 @@
         .dark ::-webkit-scrollbar-thumb { background: #64748b; }
         ::-webkit-scrollbar-thumb:hover { background: #f472b6; }
         .dark ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Cute Hub 專用動畫 */
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-20deg); }
+            50% { transform: rotate(20deg); }
+        }
+        .animate-wiggle { animation: wiggle 0.2s ease-in-out infinite; }
+        
+        @keyframes eat {
+            0%, 100% { transform: scale(1) translateX(0); }
+            50% { transform: scale(1.1) translateX(10px); }
+        }
+        .animate-eat { animation: eat 0.3s ease-in-out infinite; }
     </style>
 </head>
 <body>
@@ -252,6 +265,21 @@
           <div className={`w-full h-screen flex flex-col items-center justify-center select-none transition-colors duration-500 ${isDarkMode ? 'bg-slate-900 text-white' : 'bg-pink-50 text-gray-700'}`}>
              <IconLoader size={32} className="animate-spin text-pink-500 dark:text-pink-400 mb-6" />
              <h2 className="text-2xl font-bold">正在重新啟動...</h2>
+          </div>
+        );
+
+        const BSODScreen = () => (
+          <div className="w-full h-screen bg-[#0000AA] text-white font-mono p-8 sm:p-16 flex flex-col justify-center select-none cursor-none z-[9999] relative">
+             <h1 className="text-6xl sm:text-8xl mb-8 font-bold">:(</h1>
+             <p className="text-xl sm:text-3xl mb-8 leading-relaxed">
+               您的可愛電腦遇到了一個致命的賣萌錯誤，必須重新啟動。<br/>
+               我們正在收集錯誤資訊 (0%)
+             </p>
+             <p className="text-sm sm:text-base text-gray-300 mt-4">
+               如果您想了解更多，可以稍後在網路上搜尋此錯誤代碼: CUTE_OVERLOAD_EXCEPTION<br/><br/>
+               *** STOP: 0x000000C4 (0x0000000000000091, 0x000000000000000F, 0xFFFFF80002A3B5C8, 0x0000000000000000)<br/>
+               *** Cute3D_Render_Engine.sys - Address FFFFF80002A3B5C8 base at FFFFF80002A3B000, DateStamp 60a4f5f5
+             </p>
           </div>
         );
 
@@ -829,6 +857,204 @@
           );
         };
 
+        // 7. Cute Hub (P開頭網站惡搞版)
+        const AppCuteHub = () => {
+          const [phase, setPhase] = useState('intro'); // intro, browse, watch
+          const [introStep, setIntroStep] = useState(0);
+          const [currentVid, setCurrentVid] = useState(null);
+
+          useEffect(() => {
+              if (phase === 'intro') {
+                  // 模擬經典片頭動畫時序
+                  const t1 = setTimeout(() => setIntroStep(1), 400); // 彈出 Logo
+                  const t2 = setTimeout(() => setPhase('browse'), 2800); // 結束片頭
+                  return () => { clearTimeout(t1); clearTimeout(t2); };
+              }
+          }, [phase]);
+
+          const videos = [
+              { id: 1, title: '性感兔兔在扭屁屁 (高畫質 4K) 🔥', author: 'HotBunny99', views: '1.2M 觀看', rating: '98%', thumbEmoji: '🐇' },
+              { id: 2, title: '兔兔狂吃紅蘿蔔 (無碼流出) 💦', author: 'CarrotLover', views: '850K 觀看', rating: '95%', thumbEmoji: '🐰🥕' }
+          ];
+
+          if (phase === 'intro') {
+              return (
+                  <div className="w-full h-full bg-black flex items-center justify-center select-none overflow-hidden">
+                      <div className={`flex text-5xl sm:text-7xl font-bold font-sans transition-all duration-300 ${introStep === 1 ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`}>
+                          <span className="text-white">Cute</span>
+                          <span className="bg-[#ff9000] text-black px-2 ml-1 rounded-lg tracking-tighter">Hub</span>
+                      </div>
+                  </div>
+              );
+          }
+
+          if (phase === 'watch' && currentVid) {
+              return (
+                  <div className="w-full h-full bg-[#121212] text-white flex flex-col font-sans select-none">
+                      <div className="p-3 border-b border-[#333] flex items-center gap-3">
+                          <button onClick={() => setPhase('browse')} className="text-[#ff9000] hover:text-white font-bold transition-colors">← 返回</button>
+                          <div className="flex text-xl font-bold">
+                              <span className="text-white">Cute</span>
+                              <span className="bg-[#ff9000] text-black px-1 ml-1 rounded-sm">Hub</span>
+                          </div>
+                      </div>
+                      <div className="flex-1 flex flex-col overflow-hidden">
+                          {/* 假裝是播放器 */}
+                          <div className="w-full bg-black h-[55%] flex flex-col relative overflow-hidden group">
+                              <div className="flex-1 flex items-center justify-center relative">
+                                  {currentVid.id === 1 ? (
+                                      <div className="text-8xl animate-wiggle drop-shadow-xl">🐇</div>
+                                  ) : (
+                                      <div className="text-8xl flex items-center gap-4 drop-shadow-xl">
+                                          <span className="animate-pulse">🐰</span>
+                                          <span className="animate-eat">🥕</span>
+                                      </div>
+                                  )}
+                              </div>
+                              
+                              {/* 播放器控制列 */}
+                              <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black to-transparent flex items-center gap-3 text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <span className="text-white text-lg cursor-pointer hover:text-[#ff9000]">⏸</span>
+                                  <div className="flex-1 h-1.5 bg-gray-700 rounded-full cursor-pointer relative overflow-hidden">
+                                      <div className="w-[30%] h-full bg-[#ff9000] rounded-full relative">
+                                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow"></div>
+                                      </div>
+                                  </div>
+                                  <span className="font-mono">01:23 / 04:56</span>
+                                  <span className="cursor-pointer hover:text-white">⚙️</span>
+                                  <span className="cursor-pointer hover:text-white">🔲</span>
+                              </div>
+                          </div>
+
+                          {/* 影片資訊 */}
+                          <div className="p-4 flex-1 overflow-y-auto">
+                              <h2 className="text-lg sm:text-xl font-bold mb-2">{currentVid.title}</h2>
+                              <div className="flex justify-between text-xs sm:text-sm text-gray-400 mb-4 border-b border-[#333] pb-4">
+                                  <span className="text-[#ff9000] font-bold">👍 {currentVid.rating} <span className="text-gray-400 font-normal ml-2">{currentVid.views}</span></span>
+                                  <span>上傳者: <span className="text-white hover:text-[#ff9000] cursor-pointer">{currentVid.author}</span></span>
+                              </div>
+                              <p className="text-gray-500 text-xs sm:text-sm">
+                                  這是一部非常有教育意義的動物觀察影片。<br/>
+                                  請準備好衛生紙（用來擦因為太可愛而流的鼻血）。
+                              </p>
+                          </div>
+                      </div>
+                  </div>
+              );
+          }
+
+          return (
+              <div className="w-full h-full bg-[#121212] text-white flex flex-col font-sans select-none">
+                  {/* Header */}
+                  <div className="flex items-center justify-between p-3 border-b border-[#333] bg-[#000]">
+                      <div className="flex text-2xl font-bold cursor-pointer">
+                          <span className="text-white">Cute</span>
+                          <span className="bg-[#ff9000] text-black px-1 ml-1 rounded-md tracking-tighter">Hub</span>
+                      </div>
+                      <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm font-bold text-gray-400">
+                          <span className="text-white cursor-pointer hover:text-[#ff9000]">首頁</span>
+                          <span className="cursor-pointer hover:text-[#ff9000]">影片</span>
+                          <span className="cursor-pointer hover:text-[#ff9000]">類別</span>
+                      </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 p-4 overflow-y-auto">
+                      <h3 className="text-lg font-bold mb-4 flex items-center gap-2">🔥 熱門兔兔</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {videos.map(v => (
+                              <div key={v.id} className="cursor-pointer group" onClick={() => { setCurrentVid(v); setPhase('watch'); }}>
+                                  <div className="w-full aspect-video bg-[#222] rounded-lg mb-2 flex items-center justify-center text-6xl group-hover:ring-2 ring-[#ff9000] transition-all relative overflow-hidden shadow-lg">
+                                      <span className="group-hover:scale-125 transition-transform duration-300">{v.thumbEmoji}</span>
+                                      <div className="absolute bottom-1 right-1 bg-black/80 px-1 text-[10px] rounded font-mono text-white">04:56</div>
+                                  </div>
+                                  <h4 className="font-bold text-sm text-gray-200 group-hover:text-white line-clamp-2">{v.title}</h4>
+                                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                      <span className="hover:text-gray-300">{v.author}</span>
+                                  </div>
+                                  <div className="flex justify-between text-[10px] text-gray-500 mt-1">
+                                      <span>{v.views}</span>
+                                      <span className="text-[#ff9000] font-bold">{v.rating}</span>
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+              </div>
+          );
+        };
+
+        // 8. Cute3D (專業建模軟體)
+        const AppCute3D = () => {
+          const [objects, setObjects] = useState([
+             { id: 'init', emoji: '🧊', x: 45, y: 40 }
+          ]);
+          const [rendering, setRendering] = useState(false);
+          const [buckets, setBuckets] = useState([]);
+
+          const addObj = (emoji) => {
+            setObjects([...objects, { id: Date.now(), emoji, x: Math.random()*70 + 10, y: Math.random()*70 + 10 }]);
+          };
+
+          const handleRender = () => {
+            setRendering(true);
+            setBuckets([]);
+            let b = [];
+            // 模擬格子渲染 (Bucket Rendering)
+            const timer = setInterval(() => {
+              b.push(b.length);
+              setBuckets([...b]);
+              // 渲染到第9格 (約 2.5 秒) 直接發送藍白畫面事件！
+              if (b.length > 8) {
+                clearInterval(timer);
+                window.dispatchEvent(new CustomEvent('os-bsod'));
+              }
+            }, 300);
+          };
+
+          return (
+            <div className="w-full h-full flex flex-col bg-gray-100 dark:bg-slate-800 transition-colors select-none font-sans overflow-hidden">
+              {/* 工具列 */}
+              <div className="flex gap-2 p-2 bg-gray-200 dark:bg-slate-700 border-b border-gray-300 dark:border-slate-600 z-20">
+                <button onClick={() => addObj('🧊')} className="p-2 bg-white dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded hover:bg-pink-100 dark:hover:bg-pink-900 shadow-sm transition-colors text-sm font-bold flex items-center gap-1">🧊 <span className="hidden sm:inline">方塊</span></button>
+                <button onClick={() => addObj('🔺')} className="p-2 bg-white dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded hover:bg-pink-100 dark:hover:bg-pink-900 shadow-sm transition-colors text-sm font-bold flex items-center gap-1">🔺 <span className="hidden sm:inline">錐體</span></button>
+                <button onClick={() => addObj('🍩')} className="p-2 bg-white dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded hover:bg-pink-100 dark:hover:bg-pink-900 shadow-sm transition-colors text-sm font-bold flex items-center gap-1">🍩 <span className="hidden sm:inline">甜甜圈</span></button>
+                <div className="flex-1" />
+                <button onClick={handleRender} disabled={rendering} className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white text-sm font-bold rounded shadow-sm transition-colors flex items-center gap-2">
+                   {rendering ? '🔄 渲染中...' : '📷 Render'}
+                </button>
+              </div>
+              
+              {/* 3D 視圖區 */}
+              <div className="flex-1 relative bg-[#e5e5f7] dark:bg-[#1a1a2e]" style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+                 {/* 網格裝飾 */}
+                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 dark:opacity-40">
+                     <div className="w-48 h-48 border-[3px] border-dashed border-gray-500 rounded-full animate-[spin_10s_linear_infinite]"></div>
+                 </div>
+
+                 {/* 放置的物件 */}
+                 {objects.map(obj => (
+                   <div key={obj.id} className="absolute text-6xl hover:scale-110 transition-transform drop-shadow-[0_10px_10px_rgba(0,0,0,0.3)] z-10" style={{ left: `${obj.x}%`, top: `${obj.y}%` }}>
+                      {obj.emoji}
+                   </div>
+                 ))}
+
+                 {/* 渲染進度覆蓋層 (格子動畫) */}
+                 {rendering && (
+                   <div className="absolute inset-0 bg-black/80 z-30 grid grid-cols-4 grid-rows-3">
+                      {Array.from({length: 12}).map((_, i) => (
+                        <div key={i} className={`w-full h-full border border-orange-500/20 transition-colors duration-75 relative ${buckets.includes(i) ? 'bg-transparent border-orange-500' : 'bg-black'}`}>
+                           {/* 正在渲染那一格顯示橘色外框 */}
+                           {buckets.length === i && <div className="absolute inset-0 border-2 border-orange-400 animate-pulse bg-orange-400/20" />}
+                        </div>
+                      ))}
+                   </div>
+                 )}
+              </div>
+            </div>
+          )
+        };
+
         // --- 系統核心配置 (使用 Emoji 代替原本的圖標組件) ---
         const APPS = {
           notepad: { id: 'notepad', title: '記事本', icon: '📝', component: AppNotepad, width: 400, height: 300 },
@@ -837,6 +1063,8 @@
           pet: { id: 'pet', title: '小寵物', icon: '🐹', component: AppPet, width: 350, height: 400 },
           comfy: { id: 'comfy', title: 'CuteUI', icon: '🪄', component: AppComfyUI, width: 650, height: 450 },
           taskmgr: { id: 'taskmgr', title: '工作管理員', icon: '📈', component: AppTaskManager, width: 750, height: 500 },
+          cutehub: { id: 'cutehub', title: 'Cute Hub', icon: '🟧', component: AppCuteHub, width: 600, height: 450 },
+          cute3d: { id: 'cute3d', title: 'Cute3D', icon: '🧊', component: AppCute3D, width: 550, height: 400 },
         };
 
         // --- 視窗元件 ---
@@ -918,6 +1146,13 @@
           const [time, setTime] = useState(new Date());
           const [isDarkMode, setIsDarkMode] = useState(false);
 
+          // 監聽藍白畫面事件
+          useEffect(() => {
+            const handleBSOD = () => setBootPhase('bsod');
+            window.addEventListener('os-bsod', handleBSOD);
+            return () => window.removeEventListener('os-bsod', handleBSOD);
+          }, []);
+
           // 移除原本在這裡的倒數計時 useEffect，現在由 BiosScreen 自己管理
 
           useEffect(() => {
@@ -927,6 +1162,12 @@
             }
             if (bootPhase === 'welcome') {
               const timer = setTimeout(() => setBootPhase('os'), 2500);
+              return () => clearTimeout(timer);
+            }
+            if (bootPhase === 'bsod') {
+              setWindows([]); // 清空所有視窗 (模擬系統當機記憶體清空)
+              setStartOpen(false);
+              const timer = setTimeout(() => setBootPhase('shutdown'), 4500); // 停在藍白畫面 4.5 秒後重啟
               return () => clearTimeout(timer);
             }
           }, [bootPhase]);
@@ -1001,12 +1242,13 @@
               {bootPhase === 'dos' && <DosScreen onComplete={() => setBootPhase('welcome')} />}
               {bootPhase === 'welcome' && <WelcomeScreen isDarkMode={isDarkMode} />}
               {bootPhase === 'shutdown' && <ShutdownScreen isDarkMode={isDarkMode} />}
+              {bootPhase === 'bsod' && <BSODScreen />}
               
               {bootPhase === 'os' && (
                 <div className="w-full h-screen overflow-hidden bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 dark:from-slate-900 dark:via-indigo-950 dark:to-fuchsia-950 relative font-sans select-none flex flex-col transition-colors duration-500">
                   
                   <div className="flex-1 relative p-4" onClick={() => { setStartOpen(false); setShowPowerMenu(false); }}>
-                    <div className="flex flex-col gap-4 flex-wrap max-h-full content-start">
+                    <div className="absolute inset-4 flex flex-col gap-4 flex-wrap content-start z-0">
                       {Object.values(APPS).map(app => (
                         <button 
                           key={app.id} 
