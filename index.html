@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可愛版 Windows</title>
+    
+    <!-- 引入 Tailwind CSS (負責排版和美美的顏色) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 引入 React 核心庫 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- 引入 Babel (讓瀏覽器能看得懂 JSX 語法) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; font-family: sans-serif; }
+        /* 自訂滾動條讓它更可愛 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f472b6; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- 內建圖標 (取代外部套件，確保本地執行沒問題) ---
+        const IconStar = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>;
+        const IconX = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
+        const IconMinus = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
+        const IconSquare = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>;
+        const IconMenu = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>;
+        const IconPower = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>;
+        const IconClock = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
+        const IconRotateCw = ({ size = 24, className = "" }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} width={size} height={size}><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>;
+
+        // --- 開機畫面 (Boot Sequence) ---
+        const BiosScreen = () => (
+          <div className="w-full h-screen bg-black text-white flex flex-col items-center justify-center font-mono select-none relative">
+            <div className="flex items-start gap-4">
+              <IconStar size={48} className="text-yellow-400 fill-yellow-400" />
+              <div>
+                <h1 className="text-4xl sm:text-6xl font-bold tracking-widest text-gray-200">CUTE MEGATRENDS</h1>
+                <p className="text-sm mt-2 text-gray-400">www.cute-ami.com</p>
+              </div>
+            </div>
+            <div className="absolute bottom-12 text-gray-400 text-sm animate-pulse">
+              Press DEL to enter SETUP, ESC to skip memory test
+            </div>
+          </div>
+        );
+
+        const DosScreen = ({ onComplete }) => {
+          const [lines, setLines] = useState([]);
+          const bootMessages = [
+            "CuteBIOS (C) 2026 Cute Megatrends, Inc.",
+            "CPU: Fluffy Processor @ 2.4GHz",
+            "Memory Test: 8388608K OK",
+            "Initializing USB Controllers .. Done.",
+            "Loading Pink Aesthetics Drivers ... OK",
+            "Mounting Virtual Pet ... OK",
+            "Starting CuteOS Core ...",
+            "Welcome to CuteOS!"
+          ];
+
+          useEffect(() => {
+            let currentLine = 0;
+            const interval = setInterval(() => {
+              if (currentLine < bootMessages.length) {
+                setLines(prev => [...prev, bootMessages[currentLine]]);
+                currentLine++;
+              } else {
+                clearInterval(interval);
+                setTimeout(onComplete, 800); 
+              }
+            }, 300); 
+            return () => clearInterval(interval);
+          }, [onComplete]);
+
+          return (
+            <div className="w-full h-screen bg-black text-gray-300 font-mono p-4 select-none overflow-hidden text-sm sm:text-base">
+              <div className="flex justify-between items-start mb-4">
+                 <div className="flex items-center gap-2">
+                   <IconStar size={24} className="text-yellow-400 fill-yellow-400" />
+                   <span className="font-bold">Energy Star</span>
+                 </div>
+              </div>
+              <div className="space-y-1">
+                {lines.map((line, i) => (
+                  <div key={i}>{line}</div>
+                ))}
+                <div className="animate-pulse inline-block">_</div>
+              </div>
+            </div>
+          );
+        };
+
+        // --- 各式小應用程式 (Apps) ---
+
+        // 1. 記事本
+        const AppNotepad = () => {
+          return (
+            <div className="w-full h-full flex flex-col bg-[#fff9fa]">
+              <textarea 
+                className="flex-1 w-full p-4 bg-transparent resize-none focus:outline-none font-sans text-gray-700 leading-relaxed"
+                placeholder="在這裡寫下今天發生的可愛事情吧 (｡・ω・｡)ﾉ♡..."
+                defaultValue="這是一個可愛的記事本！&#10;你可以把視窗拖來拖去喔～"
+              />
+            </div>
+          );
+        };
+
+        // 2. 計算機
+        const AppCalculator = () => {
+          const [display, setDisplay] = useState('0');
+          const [equation, setEquation] = useState('');
+
+          const handleClick = (val) => {
+            if (val === 'C') { setDisplay('0'); setEquation(''); return; }
+            if (val === '=') {
+              try {
+                const result = new Function('return ' + equation + display)();
+                setDisplay(String(result));
+                setEquation('');
+              } catch (e) {
+                setDisplay('Error');
+              }
+              return;
+            }
+            if (['+', '-', '*', '/'].includes(val)) {
+              setEquation(equation + display + val);
+              setDisplay('0');
+              return;
+            }
+            setDisplay(display === '0' ? val : display + val);
+          };
+
+          const buttons = ['C', '/', '*', '-', '7', '8', '9', '+', '4', '5', '6', '=', '1', '2', '3', '0', '.'];
+
+          return (
+            <div className="w-full h-full flex flex-col bg-pink-50 p-4 font-mono">
+              <div className="bg-white p-3 rounded-xl mb-4 text-right shadow-inner min-h-[4rem] flex flex-col justify-end">
+                <div className="text-gray-400 text-sm h-5">{equation}</div>
+                <div className="text-3xl text-gray-700 font-bold overflow-hidden">{display}</div>
+              </div>
+              <div className="grid grid-cols-4 gap-2 flex-1">
+                {buttons.map((btn, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => handleClick(btn)}
+                    className={`rounded-xl text-lg font-bold transition-transform active:scale-95 shadow-sm
+                      ${btn === '=' ? 'col-span-1 row-span-2 bg-pink-300 text-white hover:bg-pink-400' : 
+                        btn === '0' ? 'col-span-2 bg-white text-gray-600 hover:bg-pink-100' : 
+                        ['+','-','*','/','C'].includes(btn) ? 'bg-pink-200 text-pink-800 hover:bg-pink-300' : 
+                        'bg-white text-gray-600 hover:bg-pink-100'}
+                    `}
+                    style={btn === '=' ? { gridRow: 'span 2' } : {}}
+                  >
+                    {btn}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        };
+
+        // 3. 小畫家
+        const AppPaint = () => {
+          const canvasRef = useRef(null);
+          const [isDrawing, setIsDrawing] = useState(false);
+          const [color, setColor] = useState('#ff9a9e');
+
+          useEffect(() => {
+            const canvas = canvasRef.current;
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 5;
+          }, []);
+
+          useEffect(() => {
+            if (canvasRef.current) {
+              canvasRef.current.getContext('2d').strokeStyle = color;
+            }
+          }, [color]);
+
+          const startDraw = (e) => {
+            setIsDrawing(true);
+            draw(e);
+          };
+
+          const endDraw = () => {
+            setIsDrawing(false);
+            if(canvasRef.current) canvasRef.current.getContext('2d').beginPath();
+          };
+
+          const draw = (e) => {
+            if (!isDrawing) return;
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX || (e.touches && e.touches[0].clientX);
+            const y = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            ctx.lineTo(x - rect.left, y - rect.top);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x - rect.left, y - rect.top);
+          };
+
+          const colors = ['#ff9a9e', '#fecfef', '#a1c4fd', '#fdcbf1', '#e0c3fc', '#4facfe', '#43e97b', '#333333'];
+
+          return (
+            <div className="w-full h-full flex flex-col bg-white">
+              <div className="flex gap-2 p-2 bg-purple-50 border-b border-purple-100 justify-center flex-wrap">
+                {colors.map(c => (
+                  <button 
+                    key={c} 
+                    onClick={() => setColor(c)}
+                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full shadow-sm border-2 transition-transform hover:scale-110 ${color === c ? 'border-gray-500 scale-110' : 'border-transparent'}`}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+                <button 
+                  onClick={() => {
+                    const canvas = canvasRef.current;
+                    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                  }}
+                  className="ml-auto px-3 py-1 bg-white rounded-full text-xs text-purple-600 shadow-sm border border-purple-200 hover:bg-purple-100"
+                >
+                  清除
+                </button>
+              </div>
+              <canvas 
+                ref={canvasRef}
+                onMouseDown={startDraw} onMouseMove={draw} onMouseUp={endDraw} onMouseLeave={endDraw}
+                onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={endDraw}
+                className="flex-1 w-full cursor-crosshair touch-none"
+              />
+            </div>
+          );
+        };
+
+        // 4. 小寵物
+        const AppPet = () => {
+          const [hunger, setHunger] = useState(80);
+          const [happiness, setHappiness] = useState(80);
+          const [status, setStatus] = useState('我在發呆...');
+
+          const feed = () => {
+            setHunger(prev => Math.min(100, prev + 20));
+            setStatus('嚼嚼嚼... 好吃！🍓');
+          };
+
+          const play = () => {
+            setHappiness(prev => Math.min(100, prev + 20));
+            setHunger(prev => Math.max(0, prev - 10));
+            setStatus('哇嗚～好玩！✨');
+          };
+
+          useEffect(() => {
+            const timer = setInterval(() => {
+              setHunger(prev => Math.max(0, prev - 2));
+              setHappiness(prev => Math.max(0, prev - 2));
+            }, 5000);
+            return () => clearInterval(timer);
+          }, []);
+
+          let emotion = '🐹';
+          if (happiness < 30 || hunger < 30) emotion = '🥺';
+          if (happiness > 80 && hunger > 80) emotion = '🐹💕';
+
+          return (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-orange-50 to-yellow-50 p-4">
+              <div className="text-7xl mb-4 animate-bounce">{emotion}</div>
+              <div className="bg-white px-4 py-2 rounded-2xl shadow-sm text-gray-600 text-sm mb-6 font-medium">
+                {status}
+              </div>
+              
+              <div className="w-full max-w-xs space-y-3 mb-6">
+                <div>
+                  <div className="flex justify-between text-xs text-orange-800 mb-1">
+                    <span>飽足感</span><span>{hunger}%</span>
+                  </div>
+                  <div className="h-2 bg-orange-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-orange-400 transition-all" style={{ width: `${hunger}%` }} />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs text-pink-800 mb-1">
+                    <span>心情</span><span>{happiness}%</span>
+                  </div>
+                  <div className="h-2 bg-pink-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-pink-400 transition-all" style={{ width: `${happiness}%` }} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button onClick={feed} className="px-6 py-2 bg-orange-300 hover:bg-orange-400 text-white rounded-full font-bold shadow-md transition-transform active:scale-95 flex items-center gap-2">
+                  餵食 🍓
+                </button>
+                <button onClick={play} className="px-6 py-2 bg-pink-300 hover:bg-pink-400 text-white rounded-full font-bold shadow-md transition-transform active:scale-95 flex items-center gap-2">
+                  玩耍 🎾
+                </button>
+              </div>
+            </div>
+          );
+        };
+
+        // --- 系統核心配置 (使用 Emoji 代替原本的圖標組件) ---
+        const APPS = {
+          notepad: { id: 'notepad', title: '記事本', icon: '📝', component: AppNotepad, width: 400, height: 300 },
+          calculator: { id: 'calculator', title: '計算機', icon: '🧮', component: AppCalculator, width: 300, height: 400 },
+          paint: { id: 'paint', title: '小畫家', icon: '🎨', component: AppPaint, width: 450, height: 350 },
+          pet: { id: 'pet', title: '小寵物', icon: '🐹', component: AppPet, width: 350, height: 400 },
+        };
+
+        // --- 視窗元件 ---
+        const Window = ({ win, app, onClose, onFocus, onUpdatePos, isFocused }) => {
+          const [isDragging, setIsDragging] = useState(false);
+          const [rel, setRel] = useState({ x: 0, y: 0 });
+          const [isMaximized, setIsMaximized] = useState(false);
+
+          const onPointerDown = (e) => {
+            if (e.target.closest('.window-controls')) return;
+            onFocus(win.id);
+            setIsDragging(true);
+            setRel({ x: e.clientX - win.x, y: e.clientY - win.y });
+            e.currentTarget.setPointerCapture(e.pointerId);
+          };
+
+          const onPointerMove = (e) => {
+            if (!isDragging || isMaximized) return;
+            onUpdatePos(win.id, { x: e.clientX - rel.x, y: e.clientY - rel.y });
+          };
+
+          const onPointerUp = (e) => {
+            setIsDragging(false);
+            e.currentTarget.releasePointerCapture(e.pointerId);
+          };
+
+          const AppContent = app.component;
+
+          return (
+            <div
+              className={`absolute flex flex-col bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl border ${isFocused ? 'border-pink-300 shadow-pink-200/50' : 'border-white/50'} overflow-hidden transition-all duration-200`}
+              style={{
+                left: isMaximized ? 0 : win.x,
+                top: isMaximized ? 0 : win.y,
+                width: isMaximized ? '100%' : app.width,
+                height: isMaximized ? 'calc(100% - 3.5rem)' : app.height,
+                zIndex: win.zIndex,
+                display: win.minimized ? 'none' : 'flex'
+              }}
+              onClick={() => onFocus(win.id)}
+            >
+              <div 
+                className="h-10 bg-gradient-to-r from-white/60 to-white/30 border-b border-white/40 flex items-center justify-between px-3 cursor-move select-none"
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                onDoubleClick={() => setIsMaximized(!isMaximized)}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 flex items-center justify-center text-lg">{app.icon}</div>
+                  <span className="text-sm font-bold text-gray-700">{app.title}</span>
+                </div>
+                <div className="flex items-center gap-2 window-controls">
+                  <button onClick={(e) => { e.stopPropagation(); toggleMinimize(win.id); }} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-200/50 text-gray-600 transition-colors">
+                    <IconMinus size={14} />
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); setIsMaximized(!isMaximized); }} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-200/50 text-gray-600 transition-colors">
+                    <IconSquare size={12} />
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); onClose(win.id); }} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-400 hover:text-white text-gray-600 transition-colors">
+                    <IconX size={14} />
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-hidden relative">
+                <AppContent />
+              </div>
+            </div>
+          );
+        };
+
+        // --- 主系統 ---
+        const CuteOS = () => {
+          const [bootPhase, setBootPhase] = useState('bios'); 
+          const [showPowerMenu, setShowPowerMenu] = useState(false);
+          const [windows, setWindows] = useState([]);
+          const [zIndexCounter, setZIndexCounter] = useState(10);
+          const [startOpen, setStartOpen] = useState(false);
+          const [time, setTime] = useState(new Date());
+
+          useEffect(() => {
+            if (bootPhase === 'bios') {
+              const timer = setTimeout(() => setBootPhase('dos'), 2000);
+              return () => clearTimeout(timer);
+            }
+          }, [bootPhase]);
+
+          const handleRestart = () => {
+            setBootPhase('bios');
+            setWindows([]);
+            setStartOpen(false);
+            setShowPowerMenu(false);
+          };
+
+          useEffect(() => {
+            const timer = setInterval(() => setTime(new Date()), 60000);
+            return () => clearInterval(timer);
+          }, []);
+
+          const openApp = (appId) => {
+            setStartOpen(false);
+            const existingWin = windows.find(w => w.appId === appId);
+            if (existingWin) {
+              focusWindow(existingWin.id);
+              if (existingWin.minimized) {
+                setWindows(windows.map(w => w.id === existingWin.id ? { ...w, minimized: false } : w));
+              }
+              return;
+            }
+
+            const newZ = zIndexCounter + 1;
+            setZIndexCounter(newZ);
+            const offset = (windows.length % 5) * 30;
+            // 讓視窗不會超出邊界太多
+            const startX = Math.min(50 + offset, window.innerWidth - 300);
+            const startY = Math.min(50 + offset, window.innerHeight - 300);
+
+            setWindows([...windows, {
+              id: `win_${Date.now()}`,
+              appId,
+              x: startX,
+              y: startY,
+              zIndex: newZ,
+              minimized: false
+            }]);
+          };
+
+          const closeWindow = (id) => {
+            setWindows(windows.filter(w => w.id !== id));
+          };
+
+          const focusWindow = (id) => {
+            const newZ = zIndexCounter + 1;
+            setZIndexCounter(newZ);
+            setWindows(windows.map(w => w.id === id ? { ...w, zIndex: newZ } : w));
+          };
+
+          const updateWindowPos = (id, pos) => {
+            setWindows(windows.map(w => w.id === id ? { ...w, x: pos.x, y: pos.y } : w));
+          };
+
+          const toggleMinimize = (id) => {
+            setWindows(windows.map(w => w.id === id ? { ...w, minimized: !w.minimized } : w));
+            if (!windows.find(w => w.id === id).minimized) {
+              focusWindow(id);
+            }
+          };
+
+          const highestZIndex = Math.max(...windows.map(w => w.zIndex), 0);
+
+          if (bootPhase === 'bios') return <BiosScreen />;
+          if (bootPhase === 'dos') return <DosScreen onComplete={() => setBootPhase('os')} />;
+
+          return (
+            <div className="w-full h-screen overflow-hidden bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 relative font-sans select-none flex flex-col">
+              
+              <div className="flex-1 relative p-4" onClick={() => { setStartOpen(false); setShowPowerMenu(false); }}>
+                <div className="flex flex-col gap-4 flex-wrap max-h-full content-start">
+                  {Object.values(APPS).map(app => (
+                    <button 
+                      key={app.id} 
+                      onDoubleClick={() => openApp(app.id)}
+                      onClick={() => openApp(app.id)} 
+                      className="w-20 p-2 flex flex-col items-center gap-2 rounded-xl hover:bg-white/30 transition-colors group"
+                    >
+                      <div className="w-12 h-12 bg-white/60 backdrop-blur-sm rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform text-2xl">
+                        {app.icon}
+                      </div>
+                      <span className="text-xs font-bold text-gray-700 text-center drop-shadow-sm">{app.title}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {windows.map(win => (
+                  <Window 
+                    key={win.id} 
+                    win={win} 
+                    app={APPS[win.appId]}
+                    onClose={closeWindow}
+                    onFocus={focusWindow}
+                    onUpdatePos={updateWindowPos}
+                    isFocused={win.zIndex === highestZIndex && !win.minimized}
+                  />
+                ))}
+              </div>
+
+              {startOpen && (
+                <div className="absolute bottom-16 left-4 w-64 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-4 z-50 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                    <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center text-xl shadow-sm">
+                      🐰
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-700">小主人</div>
+                      <div className="text-xs text-gray-400">可愛每一天 ✨</div>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    {Object.values(APPS).map(app => (
+                      <button 
+                        key={app.id} 
+                        onClick={() => openApp(app.id)}
+                        className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-pink-50 transition-colors text-left"
+                      >
+                        <div className="w-8 h-8 bg-white rounded-lg shadow-sm flex items-center justify-center text-lg">
+                          {app.icon}
+                        </div>
+                        <span className="text-sm font-bold text-gray-600">{app.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end relative">
+                    {showPowerMenu && (
+                      <div className="absolute bottom-12 right-0 bg-white border border-gray-200 shadow-xl rounded-xl p-2 z-50">
+                        <button 
+                          onClick={handleRestart}
+                          className="flex items-center gap-2 px-4 py-2 hover:bg-red-50 text-red-500 rounded-lg transition-colors whitespace-nowrap text-sm font-bold"
+                        >
+                          <IconRotateCw size={16} />
+                          重新啟動
+                        </button>
+                      </div>
+                    )}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setShowPowerMenu(!showPowerMenu); }}
+                      className="p-2 rounded-full hover:bg-red-50 text-red-400 transition-colors" 
+                      title="電源"
+                    >
+                      <IconPower size={18} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="h-14 bg-white/60 backdrop-blur-xl border-t border-white/50 flex items-center px-4 justify-between z-40 relative shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+                <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden no-scrollbar pr-2">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setStartOpen(!startOpen); setShowPowerMenu(false); }}
+                    className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${startOpen ? 'bg-pink-200 text-pink-700 shadow-inner' : 'bg-white text-pink-500 hover:bg-pink-50 shadow-sm hover:-translate-y-0.5'}`}
+                  >
+                    <IconMenu size={20} />
+                  </button>
+
+                  <div className="flex items-center gap-2 ml-4">
+                    {windows.map(win => {
+                      const app = APPS[win.appId];
+                      const isActive = win.zIndex === highestZIndex && !win.minimized;
+                      return (
+                        <button
+                          key={win.id}
+                          onClick={() => toggleMinimize(win.id)}
+                          className={`flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all max-w-[120px] ${isActive ? 'bg-white shadow-md text-pink-600 scale-100' : 'bg-white/40 text-gray-600 hover:bg-white/60 scale-95'}`}
+                        >
+                          <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center text-sm">
+                             <span className={isActive ? '' : 'grayscale opacity-70'}>{app.icon}</span>
+                          </div>
+                          <span className="text-sm font-bold truncate">{app.title}</span>
+                          {isActive && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-1 bg-pink-400 rounded-full" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex-shrink-0 flex items-center gap-3 px-3 py-1.5 bg-white/50 rounded-xl shadow-sm text-gray-600 text-sm font-bold ml-2">
+                  <IconClock size={16} className="text-pink-400 hidden sm:block" />
+                  {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<CuteOS />);
+    </script>
+</body>
+</html>
