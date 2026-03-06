@@ -21,6 +21,9 @@
     
     <!-- 引入 Babel (讓瀏覽器能看得懂 JSX 語法) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 新增：引入真正的 3D 渲染引擎 Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <style>
         body { margin: 0; overflow: hidden; font-family: sans-serif; }
@@ -406,6 +409,99 @@
         };
 
         // --- 各式小應用程式 (Apps) ---
+
+        // 0. 我的電腦 (檔案總管)
+        const AppExplorer = () => {
+          const [path, setPath] = useState(['此電腦']);
+          const [items, setItems] = useState([
+            { id: 1, name: 'C: (CuteOS)', type: 'drive', icon: '💽', size: '15.2 GB 可用 / 100 GB' },
+            { id: 2, name: 'D: (蘿蔔儲存區)', type: 'drive', icon: '💾', size: '890 GB 可用 / 1 TB' },
+            { id: 3, name: '我的文件', type: 'folder', icon: '📁' },
+            { id: 4, name: 'Cute Hub 下載', type: 'folder', icon: '📁' },
+          ]);
+
+          const handleOpen = (item) => {
+            if (item.type === 'drive' || item.type === 'folder') {
+              setPath([...path, item.name]);
+              setItems([
+                { id: 101, name: '找不到可愛的檔案', type: 'file', icon: '📄', size: '0 KB' },
+                { id: 102, name: '空白.txt', type: 'file', icon: '📝', size: '1 KB' }
+              ]);
+            }
+          };
+
+          const handleBack = () => {
+            if (path.length > 1) {
+              setPath(['此電腦']);
+              // 返回根目錄時還原假資料
+              setItems([
+                { id: 1, name: 'C: (CuteOS)', type: 'drive', icon: '💽', size: '15.2 GB 可用 / 100 GB' },
+                { id: 2, name: 'D: (蘿蔔儲存區)', type: 'drive', icon: '💾', size: '890 GB 可用 / 1 TB' },
+                { id: 3, name: '我的文件', type: 'folder', icon: '📁' },
+                { id: 4, name: 'Cute Hub 下載', type: 'folder', icon: '📁' },
+              ]);
+            }
+          };
+
+          return (
+            <div className="w-full h-full flex flex-col bg-white dark:bg-slate-800 font-sans text-sm select-none transition-colors">
+              {/* 工具列 */}
+              <div className="flex items-center gap-2 p-2 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 transition-colors">
+                <button onClick={handleBack} disabled={path.length === 1} className="p-1 rounded hover:bg-gray-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors">⬅</button>
+                <button onClick={handleBack} disabled={path.length === 1} className="p-1 rounded hover:bg-gray-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors">⬆</button>
+                <div className="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded px-3 py-1 flex items-center text-gray-600 dark:text-gray-300 shadow-inner">
+                   💻 {path.join(' > ')}
+                </div>
+                <div className="w-48 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded px-3 py-1 text-gray-400 hidden sm:block shadow-inner">
+                   🔍 搜尋...
+                </div>
+              </div>
+
+              <div className="flex-1 flex overflow-hidden">
+                {/* 左側導覽列 */}
+                <div className="w-40 border-r border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 p-2 flex flex-col gap-1 overflow-y-auto hidden sm:flex transition-colors">
+                  <div className="text-xs font-bold text-gray-500 mb-1 px-2">快速存取</div>
+                  {['🌟 桌面', '📥 下載', '📄 文件', '🖼️ 圖片', '🎵 音樂', '💻 此電腦'].map(nav => (
+                    <div key={nav} className={`px-2 py-1.5 rounded cursor-pointer transition-colors ${nav === '💻 此電腦' ? 'bg-blue-100 dark:bg-slate-800 text-blue-700 dark:text-blue-300 font-bold' : 'hover:bg-gray-200 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300'}`}>
+                      {nav}
+                    </div>
+                  ))}
+                </div>
+
+                {/* 主要內容區 */}
+                <div className="flex-1 bg-white dark:bg-slate-800 p-4 overflow-y-auto transition-colors">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {items.map(item => (
+                      <div 
+                        key={item.id} 
+                        onDoubleClick={() => handleOpen(item)}
+                        onClick={(e) => {
+                           e.currentTarget.classList.add('bg-blue-50', 'dark:bg-slate-700', 'ring-1', 'ring-blue-300');
+                        }}
+                        onBlur={(e) => {
+                           e.currentTarget.classList.remove('bg-blue-50', 'dark:bg-slate-700', 'ring-1', 'ring-blue-300');
+                        }}
+                        tabIndex={0}
+                        className="flex flex-col items-center p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer transition-all gap-2 outline-none group"
+                      >
+                        <div className="text-5xl group-hover:scale-105 transition-transform drop-shadow-sm">{item.icon}</div>
+                        <div className="text-center w-full">
+                           <div className="text-sm font-bold text-gray-700 dark:text-gray-200 truncate">{item.name}</div>
+                           {item.size && <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">{item.size}</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* 狀態列 */}
+              <div className="h-6 bg-gray-100 dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700 flex items-center px-4 text-xs text-gray-500 transition-colors">
+                {items.length} 個項目
+              </div>
+            </div>
+          );
+        };
 
         // 1. 記事本
         const AppNotepad = () => {
@@ -1105,27 +1201,156 @@
           );
         };
 
-        // 8. Cute3D (專業建模軟體)
+        // 8. Cute3D (專業建模軟體 - 真實 3D 升級版)
         const AppCute3D = () => {
-          const [objects, setObjects] = useState([
-             { id: 'init', emoji: '🧊', x: 45, y: 40 }
-          ]);
-          const [rendering, setRendering] = useState(false);
-          const [buckets, setBuckets] = useState([]);
+          const containerRef = useRef(null);
+          const [objects, setObjects] = React.useState([]);
+          const [selectedId, setSelectedId] = React.useState(null);
+          const [rendering, setRendering] = React.useState(false);
+          const [buckets, setBuckets] = React.useState([]);
+          
+          // 用來儲存 Three.js 的實體
+          const sceneRef = useRef(null);
+          const cameraRef = useRef(null);
+          const rendererRef = useRef(null);
+          const meshesRef = useRef({});
 
-          const addObj = (emoji) => {
-            setObjects([...objects, { id: Date.now(), emoji, x: Math.random()*70 + 10, y: Math.random()*70 + 10 }]);
+          // 初始化 Three.js 引擎
+          useEffect(() => {
+            if (!window.THREE) return; // 確保引擎已載入
+            
+            const width = containerRef.current.clientWidth;
+            const height = containerRef.current.clientHeight;
+
+            // 1. 建立場景
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1e1e1e);
+            sceneRef.current = scene;
+
+            // 2. 建立攝影機
+            const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.z = 5;
+            camera.position.y = 2;
+            camera.lookAt(0, 0, 0);
+            cameraRef.current = camera;
+
+            // 3. 建立渲染器
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            containerRef.current.appendChild(renderer.domElement);
+            rendererRef.current = renderer;
+
+            // 4. 打光 (不然模型會黑黑的)
+            const ambientLight = new THREE.AmbientLight(0x404040, 1.5); 
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(2, 5, 3).normalize();
+            scene.add(directionalLight);
+
+            // 5. 專業的網格地板
+            const gridHelper = new THREE.GridHelper(10, 10, 0x888888, 0x444444);
+            scene.add(gridHelper);
+
+            // 6. 動畫迴圈
+            let animationId;
+            const animate = () => {
+              animationId = requestAnimationFrame(animate);
+              // 讓選中的物件微微發光或標示 (這裡保持靜態，由 React 屬性控制)
+              renderer.render(scene, camera);
+            };
+            animate();
+
+            // 7. 響應式視窗縮放
+            const handleResize = () => {
+               if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
+               const w = containerRef.current.clientWidth;
+               const h = containerRef.current.clientHeight;
+               cameraRef.current.aspect = w / h;
+               cameraRef.current.updateProjectionMatrix();
+               rendererRef.current.setSize(w, h);
+            };
+            window.addEventListener('resize', handleResize);
+
+            // 清理
+            return () => {
+              cancelAnimationFrame(animationId);
+              window.removeEventListener('resize', handleResize);
+              if (containerRef.current && renderer.domElement) {
+                 containerRef.current.removeChild(renderer.domElement);
+              }
+            };
+          }, []);
+
+          // 新增 3D 物件
+          const addObj = (type) => {
+            if (!sceneRef.current) return;
+            
+            let geometry;
+            // 給它一個隨機的可愛柔和顏色
+            const randomColor = new THREE.Color().setHSL(Math.random(), 0.7, 0.6);
+            const material = new THREE.MeshStandardMaterial({ 
+              color: randomColor,
+              roughness: 0.3,
+              metalness: 0.1
+            });
+
+            if (type === 'Cube') geometry = new THREE.BoxGeometry();
+            else if (type === 'Sphere') geometry = new THREE.SphereGeometry(0.7, 32, 16);
+            else if (type === 'Cone') geometry = new THREE.ConeGeometry(0.7, 1.5, 32);
+
+            const mesh = new THREE.Mesh(geometry, material);
+            // 稍微錯開位置，不要全部疊在一起
+            mesh.position.set((Math.random() - 0.5) * 4, 0.5, (Math.random() - 0.5) * 4);
+            
+            sceneRef.current.add(mesh);
+            
+            const id = Date.now().toString();
+            meshesRef.current[id] = mesh;
+            
+            const newObj = {
+              id,
+              name: `${type} ${objects.length + 1}`,
+              type,
+              px: mesh.position.x.toFixed(2), py: mesh.position.y.toFixed(2), pz: mesh.position.z.toFixed(2),
+              rx: 0, ry: 0, rz: 0,
+              sx: 1, sy: 1, sz: 1
+            };
+            
+            setObjects(prev => [...prev, newObj]);
+            setSelectedId(id);
           };
 
+          // 處理屬性面板的數值變更
+          const updateTransform = (axis, value) => {
+             if (!selectedId) return;
+             const mesh = meshesRef.current[selectedId];
+             if (!mesh) return;
+
+             const numVal = parseFloat(value) || 0;
+             
+             setObjects(objs => objs.map(o => {
+                if (o.id === selectedId) {
+                   const newObj = { ...o, [axis]: numVal };
+                   // 即時套用到 Three.js 實體上
+                   mesh.position.set(newObj.px, newObj.py, newObj.pz);
+                   // 角度轉弧度
+                   mesh.rotation.set(newObj.rx * Math.PI/180, newObj.ry * Math.PI/180, newObj.rz * Math.PI/180);
+                   mesh.scale.set(newObj.sx, newObj.sy, newObj.sz);
+                   return newObj;
+                }
+                return o;
+             }));
+          };
+
+          // 死亡渲染引擎
           const handleRender = () => {
             setRendering(true);
             setBuckets([]);
             let b = [];
-            // 模擬格子渲染 (Bucket Rendering)
             const timer = setInterval(() => {
               b.push(b.length);
               setBuckets([...b]);
-              // 渲染到第9格 (約 2.5 秒) 直接發送藍白畫面事件！
+              // 跑到第9格必定當機送藍白畫面
               if (b.length > 8) {
                 clearInterval(timer);
                 window.dispatchEvent(new CustomEvent('os-bsod'));
@@ -1133,44 +1358,96 @@
             }, 300);
           };
 
+          const selectedObj = objects.find(o => o.id === selectedId);
+
           return (
-            <div className="w-full h-full flex flex-col bg-gray-100 dark:bg-slate-800 transition-colors select-none font-sans overflow-hidden">
-              {/* 工具列 */}
-              <div className="flex gap-2 p-2 bg-gray-200 dark:bg-slate-700 border-b border-gray-300 dark:border-slate-600 z-20">
-                <button onClick={() => addObj('🧊')} className="p-2 bg-white dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded hover:bg-pink-100 dark:hover:bg-pink-900 shadow-sm transition-colors text-sm font-bold flex items-center gap-1">🧊 <span className="hidden sm:inline">方塊</span></button>
-                <button onClick={() => addObj('🔺')} className="p-2 bg-white dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded hover:bg-pink-100 dark:hover:bg-pink-900 shadow-sm transition-colors text-sm font-bold flex items-center gap-1">🔺 <span className="hidden sm:inline">錐體</span></button>
-                <button onClick={() => addObj('🍩')} className="p-2 bg-white dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded hover:bg-pink-100 dark:hover:bg-pink-900 shadow-sm transition-colors text-sm font-bold flex items-center gap-1">🍩 <span className="hidden sm:inline">甜甜圈</span></button>
-                <div className="flex-1" />
-                <button onClick={handleRender} disabled={rendering} className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white text-sm font-bold rounded shadow-sm transition-colors flex items-center gap-2">
-                   {rendering ? '🔄 渲染中...' : '📷 Render'}
+            <div className="w-full h-full flex flex-col bg-gray-100 dark:bg-slate-800 transition-colors select-none font-sans text-xs">
+              {/* 頂部工具列 */}
+              <div className="flex gap-2 p-2 bg-gray-200 dark:bg-slate-700 border-b border-gray-300 dark:border-slate-600 z-20 items-center overflow-x-auto">
+                <button onClick={() => addObj('Cube')} className="px-3 py-1.5 bg-white dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded hover:bg-blue-50 dark:hover:bg-blue-900/50 shadow-sm transition-colors font-bold flex items-center gap-1 shrink-0">🧊 方塊</button>
+                <button onClick={() => addObj('Sphere')} className="px-3 py-1.5 bg-white dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded hover:bg-blue-50 dark:hover:bg-blue-900/50 shadow-sm transition-colors font-bold flex items-center gap-1 shrink-0">⚪ 球體</button>
+                <button onClick={() => addObj('Cone')} className="px-3 py-1.5 bg-white dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded hover:bg-blue-50 dark:hover:bg-blue-900/50 shadow-sm transition-colors font-bold flex items-center gap-1 shrink-0">🔺 錐體</button>
+                <div className="flex-1 min-w-[20px]" />
+                <button onClick={handleRender} disabled={rendering} className="px-4 py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold rounded shadow-sm transition-colors flex items-center gap-2 shrink-0">
+                   {rendering ? '🔄 渲染中...' : '📷 終極渲染 (Render)'}
                 </button>
               </div>
               
-              {/* 3D 視圖區 */}
-              <div className="flex-1 relative bg-[#e5e5f7] dark:bg-[#1a1a2e]" style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
-                 {/* 網格裝飾 */}
-                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 dark:opacity-40">
-                     <div className="w-48 h-48 border-[3px] border-dashed border-gray-500 rounded-full animate-[spin_10s_linear_infinite]"></div>
-                 </div>
-
-                 {/* 放置的物件 */}
-                 {objects.map(obj => (
-                   <div key={obj.id} className="absolute text-6xl hover:scale-110 transition-transform drop-shadow-[0_10px_10px_rgba(0,0,0,0.3)] z-10" style={{ left: `${obj.x}%`, top: `${obj.y}%` }}>
-                      {obj.emoji}
-                   </div>
-                 ))}
-
-                 {/* 渲染進度覆蓋層 (格子動畫) */}
-                 {rendering && (
-                   <div className="absolute inset-0 bg-black/80 z-30 grid grid-cols-4 grid-rows-3">
-                      {Array.from({length: 12}).map((_, i) => (
-                        <div key={i} className={`w-full h-full border border-orange-500/20 transition-colors duration-75 relative ${buckets.includes(i) ? 'bg-transparent border-orange-500' : 'bg-black'}`}>
-                           {/* 正在渲染那一格顯示橘色外框 */}
-                           {buckets.length === i && <div className="absolute inset-0 border-2 border-orange-400 animate-pulse bg-orange-400/20" />}
+              <div className="flex-1 flex overflow-hidden relative">
+                {/* 左側：大綱面板 (Hierarchy) */}
+                <div className="w-32 bg-gray-50 dark:bg-slate-900 border-r border-gray-300 dark:border-slate-700 flex flex-col">
+                  <div className="p-2 font-bold text-gray-500 border-b border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800">大綱 (Hierarchy)</div>
+                  <div className="flex-1 overflow-y-auto p-1">
+                     {objects.map(obj => (
+                        <div 
+                          key={obj.id}
+                          onClick={() => setSelectedId(obj.id)}
+                          className={`p-1.5 rounded cursor-pointer truncate ${selectedId === obj.id ? 'bg-blue-500 text-white font-bold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-800'}`}
+                        >
+                          {obj.name}
                         </div>
-                      ))}
-                   </div>
-                 )}
+                     ))}
+                     {objects.length === 0 && <div className="text-gray-400 p-2 text-center mt-4">場景是空的</div>}
+                  </div>
+                </div>
+
+                {/* 中央：3D 視圖區 */}
+                <div className="flex-1 relative bg-black" ref={containerRef}>
+                    {/* 渲染進度覆蓋層 (格子動畫) */}
+                    {rendering && (
+                       <div className="absolute inset-0 bg-black/80 z-30 grid grid-cols-4 grid-rows-3 pointer-events-none">
+                          {Array.from({length: 12}).map((_, i) => (
+                            <div key={i} className={`w-full h-full border border-orange-500/20 transition-colors duration-75 relative ${buckets.includes(i) ? 'bg-transparent border-orange-500' : 'bg-black'}`}>
+                               {/* 正在渲染那一格顯示橘色外框 */}
+                               {buckets.length === i && <div className="absolute inset-0 border-2 border-orange-400 animate-pulse bg-orange-400/20" />}
+                            </div>
+                          ))}
+                       </div>
+                     )}
+                </div>
+
+                {/* 右側：屬性面板 (Properties) */}
+                <div className="w-40 bg-gray-50 dark:bg-slate-900 border-l border-gray-300 dark:border-slate-700 flex flex-col">
+                  <div className="p-2 font-bold text-gray-500 border-b border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800">屬性 (Properties)</div>
+                  <div className="flex-1 overflow-y-auto p-2 space-y-4">
+                     {!selectedObj ? (
+                        <div className="text-gray-400 text-center mt-4">請選擇左側的物件</div>
+                     ) : (
+                        <>
+                          {/* 位置 Position */}
+                          <div className="space-y-1">
+                            <div className="font-bold text-gray-600 dark:text-gray-400 mb-1">位置 (Position)</div>
+                            {['px', 'py', 'pz'].map((axis, i) => (
+                               <div key={axis} className="flex items-center gap-2">
+                                 <span className={`w-3 font-bold ${i===0 ? 'text-red-500' : i===1 ? 'text-green-500' : 'text-blue-500'}`}>{axis[1].toUpperCase()}</span>
+                                 <input type="number" step="0.1" value={selectedObj[axis]} onChange={(e) => updateTransform(axis, e.target.value)} className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded px-1.5 py-0.5 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-blue-500" />
+                               </div>
+                            ))}
+                          </div>
+                          {/* 旋轉 Rotation */}
+                          <div className="space-y-1">
+                            <div className="font-bold text-gray-600 dark:text-gray-400 mb-1 mt-2">旋轉 (Rotation)</div>
+                            {['rx', 'ry', 'rz'].map((axis, i) => (
+                               <div key={axis} className="flex items-center gap-2">
+                                 <span className={`w-3 font-bold ${i===0 ? 'text-red-500' : i===1 ? 'text-green-500' : 'text-blue-500'}`}>{axis[1].toUpperCase()}</span>
+                                 <input type="number" step="15" value={selectedObj[axis]} onChange={(e) => updateTransform(axis, e.target.value)} className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded px-1.5 py-0.5 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-blue-500" />
+                               </div>
+                            ))}
+                          </div>
+                          {/* 縮放 Scale */}
+                          <div className="space-y-1">
+                            <div className="font-bold text-gray-600 dark:text-gray-400 mb-1 mt-2">縮放 (Scale)</div>
+                            {['sx', 'sy', 'sz'].map((axis, i) => (
+                               <div key={axis} className="flex items-center gap-2">
+                                 <span className={`w-3 font-bold ${i===0 ? 'text-red-500' : i===1 ? 'text-green-500' : 'text-blue-500'}`}>{axis[1].toUpperCase()}</span>
+                                 <input type="number" step="0.1" value={selectedObj[axis]} onChange={(e) => updateTransform(axis, e.target.value)} className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded px-1.5 py-0.5 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-blue-500" />
+                               </div>
+                            ))}
+                          </div>
+                        </>
+                     )}
+                  </div>
+                </div>
               </div>
             </div>
           )
@@ -1178,9 +1455,9 @@
 
         // 9. 瀏覽器 (Cute Browser)
         const AppBrowser = () => {
-          const [activeTab, setActiveTab] = useState(0);
-          const [searchQuery, setSearchQuery] = useState('');
-          const [showResults, setShowResults] = useState(false);
+          const [activeTab, setActiveTab] = React.useState(0);
+          const [searchQuery, setSearchQuery] = React.useState('');
+          const [showResults, setShowResults] = React.useState(false);
           
           const handleSearch = (e) => {
             if (e.key === 'Enter' || e.type === 'click') {
@@ -1255,7 +1532,7 @@
                               className="flex-1 max-w-lg border border-gray-300 dark:border-slate-600 rounded-full px-5 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 dark:bg-slate-900 dark:text-white transition-all"
                             />
                          </div>
-                         <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">為您找到約 8,934,120 項結果 (因為您太可愛了)</p>
+                         <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">為您找到約 8,934,120 項結果</p>
                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
                            {Array.from({length: 12}).map((_, i) => (
                              <div key={i} className="bg-gray-50 dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm aspect-square flex flex-col items-center justify-center p-2 border border-gray-100 dark:border-slate-700">
@@ -1307,17 +1584,17 @@
 
         // 10. CuteCut (專業剪輯軟體)
         const AppCuteCut = () => {
-          const [playing, setPlaying] = useState(false);
-          const [currentTime, setCurrentTime] = useState(0); // 0 to 100 (%)
+          const [playing, setPlaying] = React.useState(false);
+          const [currentTime, setCurrentTime] = React.useState(0); // 0 to 100 (%)
           const timelineRef = useRef(null);
           
           // 初始化兩段短片在時間軸上的位置 (start % 和 width %)
-          const [clips, setClips] = useState([
+          const [clips, setClips] = React.useState([
             { id: 1, content: '🐰', track: 1, start: 10, width: 30, color: 'bg-pink-400' },
             { id: 2, content: '🐱', track: 2, start: 45, width: 30, color: 'bg-blue-400' }
           ]);
 
-          const [draggingClip, setDraggingClip] = useState(null);
+          const [draggingClip, setDraggingClip] = React.useState(null);
 
           // 播放邏輯
           useEffect(() => {
@@ -1511,12 +1788,21 @@
 
         // 11. CuteTorrent (BT下載器)
         const AppCuteTorrent = () => {
-          const [tasks, setTasks] = useState([
+          const [tasks, setTasks] = React.useState([
             { id: 1, name: 'Cute_Linux_Distro_v2.iso', sizeMB: 2450, progress: 0, speed: 0, seeds: 0, peers: 0, status: 'stopped' },
             { id: 2, name: 'Fluffy_Bunny_4K_60fps.mp4', sizeMB: 850, progress: 0, speed: 0, seeds: 0, peers: 0, status: 'stopped' }
           ]);
-          const [activeTab, setActiveTab] = useState('pieces');
-          const [selectedTask, setSelectedTask] = useState(1);
+          const [activeTab, setActiveTab] = React.useState('pieces');
+          const [selectedTask, setSelectedTask] = React.useState(1);
+
+          // 預先產生固定的「分塊下載門檻」，讓方塊填滿時只會越來越多，不會閃爍退回！
+          const pieceThresholds = React.useMemo(() => {
+             return Array.from({length: 400}).map((_, i) => {
+                 // 模擬真實 BT 特性：頭尾通常會被優先下載
+                 if (i < 15 || i > 385) return Math.random() * 10; 
+                 return Math.random() * 100; // 中間的分塊完全隨機
+             });
+          }, []);
 
           // 核心下載模擬引擎
           useEffect(() => {
@@ -1661,9 +1947,11 @@
                     <div className="w-full h-full flex flex-col gap-1">
                        <div className="text-gray-500 mb-1">正在下載的分塊地圖 (進度: {activeTaskObj.progress.toFixed(1)}%)</div>
                        <div className="flex flex-wrap gap-px content-start bg-gray-300 dark:bg-slate-700 p-1 rounded border border-gray-400 dark:border-slate-600 flex-1 overflow-auto">
-                         {Array.from({length: 400}).map((_, i) => {
-                            // 模擬分塊被填滿的視覺效果 (有些隨機性讓它看起來更像真實BT)
-                            const isDownloaded = activeTaskObj.progress >= 100 || (i < (activeTaskObj.progress / 100) * 400 && Math.random() > 0.1) || (Math.random() < (activeTaskObj.progress / 200));
+                         {pieceThresholds.map((threshold, i) => {
+                            // 利用 taskId 讓不同任務的填滿順序看起來不一樣
+                            const adjustedThreshold = (threshold + (activeTaskObj.id * 37)) % 100;
+                            // 一旦整體進度大於該分塊的門檻，或是已經 100% 完檔，就永久亮藍色
+                            const isDownloaded = activeTaskObj.progress >= adjustedThreshold || activeTaskObj.progress >= 100;
                             return (
                               <div key={i} className={`w-3 h-3 ${isDownloaded ? 'bg-blue-500' : 'bg-white dark:bg-slate-800'}`}></div>
                             )
@@ -1682,29 +1970,30 @@
           );
         };
 
-        // 12. 隱藏的 Bunny 播放器 (點擊通知時彈出)
+        // 12. 隱藏的 Bunny 播放器 (點擊通知時彈出) - 升級成真實 4K 影片！
         const AppBunnyPlayer = () => {
            return (
-              <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden select-none">
-                 <div className="absolute top-4 left-4 text-white/50 text-sm font-mono">Fluffy_Bunny_4K_60fps.mp4</div>
-                 <div className="text-9xl animate-wiggle drop-shadow-[0_0_20px_rgba(255,105,180,0.8)]">
-                    🐇
+              <div className="w-full h-full bg-black flex flex-col relative overflow-hidden select-none">
+                 <div className="absolute top-4 left-4 text-white/70 text-sm font-mono z-10 bg-black/50 px-2 py-1 rounded backdrop-blur-sm">
+                    Fluffy_Bunny_4K_60fps.mp4
                  </div>
-                 <div className="mt-8 text-pink-400 font-bold text-xl animate-pulse tracking-widest">
-                    ( 扭 扭 扭 )
-                 </div>
-                 <div className="absolute bottom-0 w-full h-2 bg-gray-800">
-                    <div className="h-full bg-pink-500 w-full animate-[progress_10s_linear]"></div>
-                 </div>
+                 <video 
+                    src="https://succubusstudio.github.io/CuteOS/CuteHub1.mp4" 
+                    autoPlay 
+                    controls 
+                    loop 
+                    playsInline
+                    className="w-full h-full object-contain"
+                 />
               </div>
            );
         };
 
         // 13. CuteAI (人工智障大語言模型)
         const AppCuteAI = () => {
-          const [messages, setMessages] = useState([]);
-          const [input, setInput] = useState('');
-          const [isTyping, setIsTyping] = useState(false);
+          const [messages, setMessages] = React.useState([]);
+          const [input, setInput] = React.useState('');
+          const [isTyping, setIsTyping] = React.useState(false);
           const bottomRef = useRef(null);
 
           const responses = [
@@ -1751,7 +2040,7 @@
                  {messages.length === 0 ? (
                    <div className="h-full flex flex-col items-center justify-center text-center opacity-80">
                       <div className="text-6xl mb-6 animate-bounce" style={{animationDuration: '2s'}}>🤖</div>
-                      <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">今天想從哪裡開始可愛呢？</h2>
+                      <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">今天又想問什麼北七的問題呢？</h2>
                       <p className="text-sm text-gray-500 dark:text-gray-400">你可以問我任何問題，反正我都會亂回答。</p>
                    </div>
                  ) : (
@@ -1802,7 +2091,7 @@
                    </button>
                  </div>
                  <div className="text-center text-[10px] text-gray-400 dark:text-gray-500 mt-2">
-                    CuteAI 可能會產生不準確且極度荒謬的資訊，請勿當真。
+                    CuteAI 可能會產生不準確且極度荒謬的資訊，誰信誰是北七。
                  </div>
               </div>
             </div>
@@ -1811,9 +2100,9 @@
 
         // 14. CuteChat (奪命連環叩通訊軟體)
         const AppCuteChat = () => {
-          const [_, setForceUpdate] = useState(0);
-          const [activeChat, setActiveChat] = useState('boss');
-          const [input, setInput] = useState('');
+          const [_, setForceUpdate] = React.useState(0);
+          const [activeChat, setActiveChat] = React.useState('boss');
+          const [input, setInput] = React.useState('');
           const bottomRef = useRef(null);
 
           // 綁定事件監聽器，讓全域狀態更新時，畫面能重新渲染
@@ -1984,9 +2273,9 @@
 
         // 15. CuteMiner (可愛挖礦機)
         const AppCuteMiner = () => {
-          const [isMining, setIsMining] = useState(false);
-          const [logs, setLogs] = useState(["[系統] CuteMiner v1.0.0 初始化完成。", "[系統] 準備就緒。等待開挖..."]);
-          const [stats, setStats] = useState({ hashrate: 0, coins: 0.000000, temp: 42 });
+          const [isMining, setIsMining] = React.useState(false);
+          const [logs, setLogs] = React.useState(["[系統] CuteMiner v1.0.0 初始化完成。", "[系統] 準備就緒。等待開挖..."]);
+          const [stats, setStats] = React.useState({ hashrate: 0, coins: 0.000000, temp: 42 });
           const logsEndRef = useRef(null);
 
           useEffect(() => {
@@ -2089,9 +2378,9 @@
         // 16. CuteBrush (專業 3D 雕刻軟體 - 大便產生器)
         const AppCuteBrush = () => {
           const canvasRef = useRef(null);
-          const [progress, setProgress] = useState(0); // 雕刻進度 0 到 100
-          const [isDragging, setIsDragging] = useState(false);
-          const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
+          const [progress, setProgress] = React.useState(0); // 雕刻進度 0 到 100
+          const [isDragging, setIsDragging] = React.useState(false);
+          const [mousePos, setMousePos] = React.useState({ x: -100, y: -100 });
 
           // 處理 Canvas 響應式大小與重繪
           useEffect(() => {
@@ -2291,9 +2580,85 @@
           );
         };
 
+        // 17. 資源回收桶
+        const AppRecycleBin = () => {
+          const [items, setItems] = React.useState([
+            { id: 1, name: '老闆的廢話.txt', size: '999 GB', type: '📝' },
+            { id: 2, name: '沒用的專案.doc', size: '2 MB', type: '📄' },
+            { id: 3, name: '前任的照片.png', size: '15 KB', type: '🖼️' },
+            { id: 4, name: '大便.obj', size: '85 MB', type: '🧊' }
+          ]);
+          const [isEmptying, setIsEmptying] = React.useState(false);
+
+          const emptyTrash = () => {
+            setIsEmptying(true);
+            setTimeout(() => {
+              setItems([]);
+              setIsEmptying(false);
+              window.dispatchEvent(new CustomEvent('os-notify', {
+                detail: { title: '資源回收桶 🗑️', message: '垃圾已經全部清空囉！✨ 你的電腦變得更輕盈了！' }
+              }));
+            }, 1500);
+          };
+
+          return (
+            <div className="w-full h-full flex flex-col bg-white dark:bg-slate-800 font-sans transition-colors select-none text-sm">
+              {/* 工具列 */}
+              <div className="flex gap-2 p-2 bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 transition-colors">
+                <button 
+                  onClick={emptyTrash} 
+                  disabled={items.length === 0 || isEmptying}
+                  className="px-4 py-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-red-200 dark:border-red-800 flex items-center gap-2 font-bold"
+                >
+                  {isEmptying ? '🗑️ 清理中...' : '🗑️ 清空資源回收桶'}
+                </button>
+                <button 
+                  disabled={items.length === 0 || isEmptying}
+                  className="px-4 py-1.5 bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors border border-gray-200 dark:border-slate-600"
+                >
+                   還原所有項目
+                </button>
+              </div>
+
+              {/* 內容區 */}
+              <div className="flex-1 overflow-y-auto p-4 bg-white dark:bg-slate-800 transition-colors">
+                {items.length === 0 ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 animate-in fade-in zoom-in duration-500">
+                     <div className="text-6xl mb-4 opacity-50 drop-shadow-sm">✨</div>
+                     <div className="font-bold text-lg">這裡很乾淨！</div>
+                     <div className="text-sm mt-2">沒有任何垃圾喔。</div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {items.map(item => (
+                      <div 
+                        key={item.id} 
+                        tabIndex={0}
+                        className={`flex flex-col items-center p-3 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-700/50 cursor-pointer transition-all gap-2 group outline-none focus:bg-blue-50 focus:ring-1 focus:ring-blue-300 dark:focus:bg-slate-700 ${isEmptying ? 'animate-bounce opacity-50' : ''}`}
+                      >
+                        <div className="text-5xl group-hover:scale-105 transition-transform drop-shadow-sm opacity-80 group-hover:opacity-100 group-focus:opacity-100">{item.type}</div>
+                        <div className="text-center w-full">
+                           <div className="text-sm font-bold text-gray-700 dark:text-gray-200 truncate">{item.name}</div>
+                           <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">{item.size}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* 狀態列 */}
+              <div className="h-6 bg-gray-100 dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700 flex items-center px-4 text-xs text-gray-500 transition-colors">
+                {items.length} 個項目
+              </div>
+            </div>
+          );
+        };
+
 
         // --- 系統核心配置 (使用 Emoji 代替原本的圖標組件) ---
         const APPS = {
+          // 將「我的電腦」加在第一個！
+          explorer: { id: 'explorer', title: '我的電腦', icon: '💻', component: AppExplorer, width: 650, height: 450 },
           notepad: { id: 'notepad', title: '記事本', icon: '📝', component: AppNotepad, width: 400, height: 300 },
           calculator: { id: 'calculator', title: '計算機', icon: '🧮', component: AppCalculator, width: 300, height: 400 },
           paint: { id: 'paint', title: '小畫家', icon: '🎨', component: AppPaint, width: 450, height: 350 },
@@ -2309,15 +2674,17 @@
           cutechat: { id: 'cutechat', title: 'CuteChat', icon: '💬', component: AppCuteChat, width: 600, height: 500 },
           cuteminer: { id: 'cuteminer', title: 'CuteMiner', icon: '⛏️', component: AppCuteMiner, width: 600, height: 400 },
           cutebrush: { id: 'cutebrush', title: 'CuteBrush', icon: '🖌️', component: AppCuteBrush, width: 750, height: 550 },
+          // 資源回收桶 (透過 bottomRight: true 指定放在右下角)
+          recyclebin: { id: 'recyclebin', title: '資源回收桶', icon: '🗑️', component: AppRecycleBin, width: 600, height: 450, bottomRight: true },
           // 隱藏的 App，不會顯示在桌面和開始選單
           bunnyplayer: { id: 'bunnyplayer', title: '可愛播放器', icon: '▶️', component: AppBunnyPlayer, width: 400, height: 300, hidden: true },
         };
 
         // --- 視窗元件 ---
         const Window = ({ win, app, onClose, onFocus, onUpdatePos, isFocused }) => {
-          const [isDragging, setIsDragging] = useState(false);
-          const [rel, setRel] = useState({ x: 0, y: 0 });
-          const [isMaximized, setIsMaximized] = useState(false);
+          const [isDragging, setIsDragging] = React.useState(false);
+          const [rel, setRel] = React.useState({ x: 0, y: 0 });
+          const [isMaximized, setIsMaximized] = React.useState(false);
 
           const onPointerDown = (e) => {
             if (e.target.closest('.window-controls')) return;
@@ -2385,16 +2752,16 @@
         // --- 主系統 ---
         const CuteOS = () => {
           // 修改：將初始狀態設定為 'welcome'，跳過 'bios' 和 'dos'
-          const [bootPhase, setBootPhase] = useState('welcome'); 
-          const [showPowerMenu, setShowPowerMenu] = useState(false);
-          const [windows, setWindows] = useState([]);
-          const [zIndexCounter, setZIndexCounter] = useState(10);
-          const [startOpen, setStartOpen] = useState(false);
-          const [time, setTime] = useState(new Date());
-          const [isDarkMode, setIsDarkMode] = useState(false);
-          const [notifications, setNotifications] = useState([]);
-          const [wallpaper, setWallpaper] = useState('default'); // 新增桌布狀態
-          const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0 }); // 新增右鍵選單狀態
+          const [bootPhase, setBootPhase] = React.useState('welcome'); 
+          const [showPowerMenu, setShowPowerMenu] = React.useState(false);
+          const [windows, setWindows] = React.useState([]);
+          const [zIndexCounter, setZIndexCounter] = React.useState(10);
+          const [startOpen, setStartOpen] = React.useState(false);
+          const [time, setTime] = React.useState(new Date());
+          const [isDarkMode, setIsDarkMode] = React.useState(false);
+          const [notifications, setNotifications] = React.useState([]);
+          const [wallpaper, setWallpaper] = React.useState('default'); // 新增桌布狀態
+          const [contextMenu, setContextMenu] = React.useState({ show: false, x: 0, y: 0 }); // 新增右鍵選單狀態
 
           // 監聽藍白畫面與系統通知事件
           useEffect(() => {
@@ -2585,8 +2952,25 @@
                     }}
                   >
                     <div className="absolute inset-4 flex flex-col gap-4 flex-wrap content-start z-0">
-                      {/* 只渲染沒有隱藏的 App 作為桌面圖示 */}
-                      {Object.values(APPS).filter(app => !app.hidden).map(app => (
+                      {/* 一般桌面圖示 (過濾掉隱藏與設定在右下角的圖示) */}
+                      {Object.values(APPS).filter(app => !app.hidden && !app.bottomRight).map(app => (
+                        <button 
+                          key={app.id} 
+                          onDoubleClick={() => openApp(app.id)}
+                          onClick={() => openApp(app.id)} 
+                          className="w-20 p-2 flex flex-col items-center gap-2 rounded-xl hover:bg-white/30 dark:hover:bg-slate-800/50 transition-colors group"
+                        >
+                          <div className="w-12 h-12 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-105 transition-all text-2xl border border-transparent dark:border-slate-700/50">
+                            {app.icon}
+                          </div>
+                          <span className="text-xs font-bold text-gray-700 dark:text-gray-200 text-center drop-shadow-sm transition-colors">{app.title}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* 右下角獨立圖示區 (資源回收桶) */}
+                    <div className="absolute bottom-4 right-4 flex flex-col gap-4 z-0">
+                      {Object.values(APPS).filter(app => app.bottomRight).map(app => (
                         <button 
                           key={app.id} 
                           onDoubleClick={() => openApp(app.id)}
@@ -2652,8 +3036,8 @@
                       </div>
                     )}
 
-                    {/* 系統通知渲染區 (右下角) */}
-                    <div className="absolute bottom-4 right-4 flex flex-col gap-3 z-50 pointer-events-none">
+                    {/* 系統通知渲染區 (為了不擋住資源回收桶，稍微往上移到 bottom-28) */}
+                    <div className="absolute bottom-28 right-4 flex flex-col gap-3 z-50 pointer-events-none">
                        {notifications.map(n => (
                          <div 
                            key={n.id} 
@@ -2682,8 +3066,8 @@
                         </div>
                       </div>
                       <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
-                        {/* 開始選單也只顯示沒有隱藏的 App */}
-                        {Object.values(APPS).filter(app => !app.hidden).map(app => (
+                        {/* 開始選單也只顯示沒有隱藏的 App (過濾掉右下角特權圖示) */}
+                        {Object.values(APPS).filter(app => !app.hidden && !app.bottomRight).map(app => (
                           <button 
                             key={app.id} 
                             onClick={() => openApp(app.id)}
